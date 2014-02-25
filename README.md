@@ -7,6 +7,7 @@ Hence, it doesn't pretend to be nice but useful and efficient, so any graphical 
 
 To use it, once packaged, add the following plugin information in the tycho repository plugin : 
 
+```xml
 &lt;build&gt;
 	&lt;plugins&gt;
 		&lt;plugin&gt;
@@ -25,3 +26,4 @@ To use it, once packaged, add the following plugin information in the tycho repo
 		&lt;/plugin&gt;
 	&lt;/plugins&gt;
 &lt;/build&gt;
+```
