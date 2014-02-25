@@ -8,22 +8,22 @@ Hence, it doesn't pretend to be nice but useful and efficient, so any graphical 
 To use it, once packaged, add the following plugin information in the tycho repository plugin : 
 
 ```xml
-&lt;build&gt;
-	&lt;plugins&gt;
-		&lt;plugin&gt;
-			&lt;groupId&gt;com.worldline.mojo&lt;/groupId&gt;
-			&lt;artifactId&gt;p2repo-index-plugin&lt;/artifactId&gt;
-			&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
-			&lt;executions&gt;
-				&lt;execution&gt;
-					&lt;id&gt;generate-index&lt;/id&gt;
-					&lt;phase&gt;package&lt;/phase&gt;
-					&lt;goals&gt;
-						&lt;goal&gt;generate-index&lt;/goal&gt;
-					&lt;/goals&gt;
-				&lt;/execution&gt;
-			&lt;/executions&gt;
-		&lt;/plugin&gt;
-	&lt;/plugins&gt;
-&lt;/build&gt;
+<build>
+	<plugins>
+		<plugin>
+			<groupId>com.worldline.mojo</groupId>
+			<artifactId>p2repo-index-plugin</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<executions>
+				<execution>
+					<id>generate-index</id>
+					<phase>package</phase>
+					<goals>
+						<goal>generate-index</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>
+	</plugins>
+</build>
 ```
