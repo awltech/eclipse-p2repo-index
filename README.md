@@ -10,7 +10,7 @@ To use it, once packaged, add the following plugin information in the tycho repo
 &lt;build&gt;
 	&lt;plugins&gt;
 		&lt;plugin&gt;
-			&lt;groupId&gt;com.worldline.mojos&lt;/groupId&gt;
+			&lt;groupId&gt;com.worldline.mojo&lt;/groupId&gt;
 			&lt;artifactId&gt;p2repo-index-plugin&lt;/artifactId&gt;
 			&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
 			&lt;executions&gt;
