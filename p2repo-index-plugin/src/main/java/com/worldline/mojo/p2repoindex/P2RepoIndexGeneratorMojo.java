@@ -72,6 +72,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				writer.write("<div> - " + feature.getName() + "</div>\n");
 			}
 			writer.write("</p></section></div></body>");
+			getLog().info("Index file generated successfully.");
 			writer.close();
 		} catch (IOException e) {
 			getLog().error("Could not write index file.");
