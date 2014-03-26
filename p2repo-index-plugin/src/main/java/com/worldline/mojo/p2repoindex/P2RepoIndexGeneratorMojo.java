@@ -20,7 +20,6 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	private MavenProject mavenProject;
 
 	public void execute() throws MojoExecutionException, MojoFailureException {
-
 		// To ensure there is no error.
 		if (this.mavenProject == null) {
 			getLog().error("Could not retrieve Maven project.");
@@ -33,9 +32,13 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		while (parentMavenProject.getParent() != null) {
 			parentMavenProject = parentMavenProject.getParent();
 		}
+		if (getLog().isDebugEnabled())
+			getLog().debug(
+					"Will use as parent project: " + parentMavenProject.getGroupId() + ":"
+							+ parentMavenProject.getArtifactId() + ":" + parentMavenProject.getVersion());
 
 		String parentProjectName = parentMavenProject.getName();
-		String parentProjectPath = parentMavenProject.getUrl();
+		String parentProjectURL = parentMavenProject.getUrl();
 
 		String basedirPath = this.mavenProject.getBasedir().getPath();
 		String repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
@@ -44,7 +47,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		File repo = new File(repoPath);
 		if (!repo.exists()) {
-			getLog().error("Repository doesn't exist.");
+			getLog().error("Repository doesn't exist at " + repo.getPath() + ".");
 			return;
 		}
 
@@ -52,11 +55,12 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		try {
 			index.createNewFile();
 		} catch (IOException e) {
-			getLog().error("Could not create index file");
+			getLog().error("Could not create index file because of " + e.getMessage() + ".", e);
 			return;
 		}
 
-		// Generate index.html file, to prevent from 404 error when browsing repository.
+		// Generate index.html file, to prevent from 404 error when browsing
+		// repository.
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(index));
 			writer.write("<head></head>\n");
@@ -66,16 +70,16 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			writer.write("<div>This page is is an Eclipse Update Site, and hence, not intended from browsing.</div>\n");
 			writer.write("<div>To use it, please do into your Eclipse instance, and select the Install New Software option with this URL to access the binaries.</div>\n");
 			writer.write("<div>If you were looking for the documentation of this project, please click <a href=\""
-					+ parentProjectPath + "\">here</a> to be redirected..</div>\n");
+					+ parentProjectURL + "\">here</a> to be redirected..</div>\n");
 			writer.write("</p></section><section><p>Here are the included features:</p><p>\n");
 			for (File feature : new File(featuresPath).listFiles()) {
 				writer.write("<div> - " + feature.getName() + "</div>\n");
 			}
 			writer.write("</p></section></div></body>");
-			getLog().info("Index file generated successfully.");
+			getLog().info("Index file generated successfully at " + index.getPath() + ".");
 			writer.close();
 		} catch (IOException e) {
-			getLog().error("Could not write index file.");
+			getLog().error("Could not write index file because of " + e.getMessage() + ".", e);
 			return;
 		}
 
