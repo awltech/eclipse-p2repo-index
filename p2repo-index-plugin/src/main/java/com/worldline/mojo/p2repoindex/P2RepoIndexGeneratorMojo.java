@@ -32,9 +32,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		while (parentMavenProject.getParent() != null && !"pom".equals(parentMavenProject.getPackaging())) {
 			parentMavenProject = parentMavenProject.getParent();
 		}
-		if (getLog().isDebugEnabled())
-			getLog().debug(
-					"Will use as parent project: " + parentMavenProject.getGroupId() + ":"
+		if (getLog().isInfoEnabled())
+			getLog().info(
+					"Using as parent project: " + parentMavenProject.getGroupId() + ":"
 							+ parentMavenProject.getArtifactId() + ":" + parentMavenProject.getVersion());
 
 		String projectName = parentMavenProject.getName();
