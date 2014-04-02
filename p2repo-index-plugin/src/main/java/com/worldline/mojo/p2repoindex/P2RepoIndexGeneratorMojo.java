@@ -69,8 +69,10 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			writer.write("</h3></section><section><p>\n");
 			writer.write("<div>This page is is an Eclipse Update Site, and hence, not intended from browsing.</div>\n");
 			writer.write("<div>To use it, please do into your Eclipse instance, and select the Install New Software option with this URL to access the binaries.</div>\n");
-			writer.write("<div>If you were looking for the documentation of this project, please click <a href=\""
-					+ parentProjectURL + "\">here</a> to be redirected..</div>\n");
+			if (parentProjectURL != null && parentProjectURL.length() > 0) {
+				writer.write("<div>If you were looking for the documentation of this project, please click <a href=\""
+						+ parentProjectURL + "\">here</a> to be redirected..</div>\n");
+			}
 			writer.write("</p></section><section><p>Here are the included features:</p><p>\n");
 			for (File feature : new File(featuresPath).listFiles()) {
 				writer.write("<div> - " + feature.getName() + "</div>\n");
