@@ -29,7 +29,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		// Takes the parent maven project, mainly for getting information of
 		// name.
 		MavenProject parentMavenProject = this.mavenProject;
-		while (parentMavenProject.getParent() != null) {
+		while (parentMavenProject.getParent() != null && !"pom".equals(parentMavenProject.getPackaging())) {
 			parentMavenProject = parentMavenProject.getParent();
 		}
 		if (getLog().isDebugEnabled())
@@ -38,6 +38,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 							+ parentMavenProject.getArtifactId() + ":" + parentMavenProject.getVersion());
 
 		String parentProjectName = parentMavenProject.getName();
+		if (parentProjectName == null || parentProjectName.length() == 0)
+			parentProjectName = parentMavenProject.getArtifactId();
+		
 		String parentProjectURL = parentMavenProject.getUrl();
 
 		String basedirPath = this.mavenProject.getBasedir().getPath();
