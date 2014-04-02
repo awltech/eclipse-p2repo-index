@@ -37,11 +37,11 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 					"Will use as parent project: " + parentMavenProject.getGroupId() + ":"
 							+ parentMavenProject.getArtifactId() + ":" + parentMavenProject.getVersion());
 
-		String parentProjectName = parentMavenProject.getName();
-		if (parentProjectName == null || parentProjectName.length() == 0)
-			parentProjectName = parentMavenProject.getArtifactId();
+		String projectName = parentMavenProject.getName();
+		if (projectName == null || projectName.length() == 0)
+			projectName = parentMavenProject.getArtifactId();
 		
-		String parentProjectURL = parentMavenProject.getUrl();
+		String projectURL = parentMavenProject.getUrl();
 
 		String basedirPath = this.mavenProject.getBasedir().getPath();
 		String repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
@@ -68,13 +68,13 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(index));
 			writer.write("<head></head>\n");
 			writer.write("<body><div><section><h3>\n");
-			writer.write("Welcome on the " + parentProjectName + " Update site !\n");
+			writer.write("Welcome on the " + projectName + " Update site !\n");
 			writer.write("</h3></section><section><p>\n");
 			writer.write("<div>This page is is an Eclipse Update Site, and hence, not intended from browsing.</div>\n");
 			writer.write("<div>To use it, please do into your Eclipse instance, and select the Install New Software option with this URL to access the binaries.</div>\n");
-			if (parentProjectURL != null && parentProjectURL.length() > 0) {
+			if (projectURL != null && projectURL.length() > 0) {
 				writer.write("<div>If you were looking for the documentation of this project, please click <a href=\""
-						+ parentProjectURL + "\">here</a> to be redirected..</div>\n");
+						+ projectURL + "\">here</a> to be redirected..</div>\n");
 			}
 			writer.write("</p></section><section><p>Here are the included features:</p><p>\n");
 			for (File feature : new File(featuresPath).listFiles()) {
