@@ -37,11 +37,15 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 					"Using as parent project: " + parentMavenProject.getGroupId() + ":"
 							+ parentMavenProject.getArtifactId() + ":" + parentMavenProject.getVersion());
 
-		String projectName = parentMavenProject.getName();
+		String projectName = this.mavenProject.getName();
+		if (projectName == null || projectName.length() == 0)
+			projectName = parentMavenProject.getName();
 		if (projectName == null || projectName.length() == 0)
 			projectName = parentMavenProject.getArtifactId();
-		
-		String projectURL = parentMavenProject.getUrl();
+
+		String projectURL = this.mavenProject.getUrl();
+		if (projectURL == null || projectURL.length() == 0)
+			projectURL = parentMavenProject.getUrl();
 
 		String basedirPath = this.mavenProject.getBasedir().getPath();
 		String repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
@@ -81,7 +85,8 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				writer.write("<div> - " + feature.getName() + "</div>\n");
 			}
 			writer.write("</p></section></div></body>");
-			getLog().info("Index file generated successfully at " + index.getPath() + ".");
+			if (getLog().isInfoEnabled())
+				getLog().info("Index file generated successfully at " + index.getPath() + ".");
 			writer.close();
 		} catch (IOException e) {
 			getLog().error("Could not write index file because of " + e.getMessage() + ".", e);
