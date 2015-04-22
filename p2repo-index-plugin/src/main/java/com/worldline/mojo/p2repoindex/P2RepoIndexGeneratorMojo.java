@@ -16,58 +16,42 @@ import org.apache.maven.project.MavenProject;
 @Mojo(name = "generate-index", defaultPhase = LifecyclePhase.PACKAGE)
 public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
-	@Parameter(required = true, readonly = true, defaultValue = "${project}")
+	@Parameter(required = false, defaultValue = "${project}")
 	private MavenProject mavenProject;
 
 	@Parameter(required = false, property = "repositoryPath")
-	private String overriddenRepositoryPath;
+	private String repositoryPath;
+	
+	@Parameter(required = false, property = "projectName")
+	private String projectName = "<PROJECT_NAME>";
+	
+	@Parameter(required = false, property = "documentationUrl")
+	private String documentationURL = "http://www.example.org";
+	
 
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		// To ensure there is no error.
 		
-		if (this.mavenProject == null) {
-			getLog().error("Could not retrieve Maven project.");
-			return;
+		String effectiveProjectName = projectName;
+		if (effectiveProjectName == null && this.mavenProject != null) {
+			effectiveProjectName = this.mavenProject.getName();
 		}
 		
-		MavenProject parentMavenProject = this.mavenProject;
-		while (parentMavenProject.getParent() != null && !"pom".equals(parentMavenProject.getPackaging())) {
-			parentMavenProject = parentMavenProject.getParent();
-		}
-		if (getLog().isInfoEnabled())
-			getLog().info(
-					"Using as parent project: " + parentMavenProject.getGroupId() + ":"
-							+ parentMavenProject.getArtifactId() + ":" + parentMavenProject.getVersion());
-
-		String projectName = this.mavenProject.getName();
-		if (projectName == null || projectName.length() == 0)
-			projectName = parentMavenProject.getName();
-		if (projectName == null || projectName.length() == 0)
-			projectName = parentMavenProject.getArtifactId();
-
-		String projectURL = this.mavenProject.getUrl();
-		if (projectURL == null || projectURL.length() == 0)
-			projectURL = parentMavenProject.getUrl();
-
-		
-		String repoPath = null;
-		
-		if (overriddenRepositoryPath != null && new File(overriddenRepositoryPath).exists()) {
-			repoPath = overriddenRepositoryPath;
-			getLog().info("repository path specified by user. Will use it at destination: "+ repoPath);
-		} else {
-			// Takes the parent maven project, mainly for getting information of
-			// name.
-		
+		String repoPath = repositoryPath;
+		if (repoPath == null && this.mavenProject != null) {
 			String basedirPath = this.mavenProject.getBasedir().getPath();
 			repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
 					.concat("repository");
-
-			File repo = new File(repoPath);
-			if (!repo.exists()) {
-				getLog().error("Repository doesn't exist at " + repo.getPath() + ".");
-				return;
-			}
+		}
+		
+		String projectURL = documentationURL;
+		if (projectURL == null && this.mavenProject != null) {
+			projectURL = this.mavenProject.getUrl();
+		}
+		
+		if (repoPath == null) {
+			getLog().error("Cannot resolve Repository Path at all. Aborts.");
+			return;
 		}
 		
 		String featuresPath = repoPath.concat(File.separator).concat("features");
