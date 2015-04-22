@@ -48,7 +48,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			projectURL = this.mavenProject.getUrl();
 		}
 
-		if (repoPath == null) {
+		if (repoPath == null || !new File(repoPath).exists()) {
 			getLog().error("Cannot resolve Repository Path at all. Aborts.");
 			return;
 		}
