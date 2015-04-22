@@ -19,15 +19,17 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	@Parameter(required = true, readonly = true, defaultValue = "${project}")
 	private MavenProject mavenProject;
 
+	@Parameter(required = false, property = "repositoryPath")
+	private String overriddenRepositoryPath;
+
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		// To ensure there is no error.
+		
 		if (this.mavenProject == null) {
 			getLog().error("Could not retrieve Maven project.");
 			return;
 		}
-
-		// Takes the parent maven project, mainly for getting information of
-		// name.
+		
 		MavenProject parentMavenProject = this.mavenProject;
 		while (parentMavenProject.getParent() != null && !"pom".equals(parentMavenProject.getPackaging())) {
 			parentMavenProject = parentMavenProject.getParent();
@@ -47,17 +49,28 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		if (projectURL == null || projectURL.length() == 0)
 			projectURL = parentMavenProject.getUrl();
 
-		String basedirPath = this.mavenProject.getBasedir().getPath();
-		String repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
-				.concat("repository");
-		String featuresPath = repoPath.concat(File.separator).concat("features");
+		
+		String repoPath = null;
+		
+		if (overriddenRepositoryPath != null && new File(overriddenRepositoryPath).exists()) {
+			repoPath = overriddenRepositoryPath;
+			getLog().info("repository path specified by user. Will use it at destination: "+ repoPath);
+		} else {
+			// Takes the parent maven project, mainly for getting information of
+			// name.
+		
+			String basedirPath = this.mavenProject.getBasedir().getPath();
+			repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
+					.concat("repository");
 
-		File repo = new File(repoPath);
-		if (!repo.exists()) {
-			getLog().error("Repository doesn't exist at " + repo.getPath() + ".");
-			return;
+			File repo = new File(repoPath);
+			if (!repo.exists()) {
+				getLog().error("Repository doesn't exist at " + repo.getPath() + ".");
+				return;
+			}
 		}
-
+		
+		String featuresPath = repoPath.concat(File.separator).concat("features");
 		File index = new File(repoPath.concat(File.separator).concat("index.html"));
 		try {
 			index.createNewFile();
