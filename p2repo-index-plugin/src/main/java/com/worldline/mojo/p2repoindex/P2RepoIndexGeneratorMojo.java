@@ -66,11 +66,11 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		// repository.
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(index));
-			writer.write("<head></head>\n");
+			writer.write("<head><title>"+effectiveProjectName+" Eclipse Update Site</title></head>\n");
 			writer.write("<body><div><section><h3>\n");
-			writer.write("Welcome on the \"" + effectiveProjectName + "\" Update site !\n");
+			writer.write("Welcome on the \"" + effectiveProjectName + "\" Eclipse Update Site !\n");
 			writer.write("</h3></section><section><p>\n");
-			writer.write("<div>This page is is an Eclipse Update Site, and hence, not intended from browsing.</div>\n");
+			writer.write("<div>As this page is an Eclipse Update Site, it is not intended from browsing.</div>\n");
 			writer.write("<div>To use it, please go into your Eclipse instance, and select the <b>Install New Software</b> option with this URL to access the binaries.</div>\n");
 			if (projectURL != null && projectURL.length() > 0) {
 				writer.write("<div>If you were looking for the documentation of this project, please click <a href=\""
