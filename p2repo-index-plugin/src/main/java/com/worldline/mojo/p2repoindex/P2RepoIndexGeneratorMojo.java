@@ -53,8 +53,6 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			return;
 		}
 
-		// String featuresPath =
-		// repoPath.concat(File.separator).concat("features");
 		File index = new File(repoPath.concat(File.separator).concat("index.html"));
 		try {
 			index.createNewFile();
