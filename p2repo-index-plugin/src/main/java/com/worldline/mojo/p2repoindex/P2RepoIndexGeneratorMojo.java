@@ -98,7 +98,8 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			//
 			// Collections.sort(features);
 
-			writer.write("<table>\n");
+			writer.write("<table border=\"1\">\n");
+			writer.write("<tr><th>Name</th><th>Identifier</th><th>Version</th></tr>\n");
 			for (FeatureDescriptor feature : featureDescriptors) {
 				writer.write(String.format("<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n", feature.getName(),
 						feature.getId(), feature.getVersion()));
