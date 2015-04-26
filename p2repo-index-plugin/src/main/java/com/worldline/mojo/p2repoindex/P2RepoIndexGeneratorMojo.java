@@ -64,7 +64,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		// Generate index.html file, to prevent from 404 error when browsing
 		// repository.
 
-		RepositoryDescriptor repositoryDescriptor = getRepositoryDeescriptor(repoPath);
+		RepositoryDescriptor repositoryDescriptor = getRepositoryDescriptor(repoPath);
 		Collections.sort(repositoryDescriptor.getFeatureDescriptors());
 
 		try {
@@ -102,7 +102,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 	}
 
-	private RepositoryDescriptor getRepositoryDeescriptor(String repoPath) {
+	private RepositoryDescriptor getRepositoryDescriptor(String repoPath) {
 		RepositoryDescriptor repositoryDescriptor = new RepositoryDescriptor();
 		InputStream contentsFileInputStream = null;
 		ZipFile zipFile = null;
@@ -125,6 +125,13 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				Element repository = build.getRootElement();
 
 				repositoryDescriptor.setName(repository.getAttributeValue("name"));
+
+				for (Object o : repository.getChild("properties").getChildren("property")) {
+					Element e = (Element) o;
+					if ("p2.timestamp".equals(e.getAttributeValue("name"))) {
+						repositoryDescriptor.setTimestamp(e.getAttributeValue("value"));
+					}
+				}
 
 				Element units = repository.getChild("units");
 				for (Object o : units.getChildren("unit")) {

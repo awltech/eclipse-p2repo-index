@@ -6,6 +6,8 @@ import java.util.List;
 public class RepositoryDescriptor {
 
 	private String name;
+	
+	private String timestamp;
 
 	public RepositoryDescriptor() {
 	}
@@ -22,6 +24,14 @@ public class RepositoryDescriptor {
 
 	public List<FeatureDescriptor> getFeatureDescriptors() {
 		return featureDescriptors;
+	}
+
+	public String getTimestamp() {
+		return timestamp;
+	}
+	
+	public void setTimestamp(String timestamp) {
+		this.timestamp = timestamp;
 	}
 
 }
