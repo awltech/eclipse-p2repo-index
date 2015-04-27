@@ -136,19 +136,16 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	}
 
 	private File locateRepositoryProject(File mavenProjectFile) throws Exception {
-		System.out.println(mavenProjectFile.getPath());
 		if (mavenProject == null) {
 			return null;
 		}
 		MavenProject mavenProject = read(mavenProjectFile);
-		System.out.println(mavenProject);
 		if (mavenProject != null && "pom".equals(mavenProject.getPackaging())) {
 			for (Object o : mavenProject.getModules()) {
 				if (o instanceof String) {
 					String moduleAsString = (String) o;
 					File subPom = new File(mavenProjectFile.getParentFile().getPath() + File.separator + moduleAsString
 							+ File.separator + "pom.xml");
-					System.out.println("subpompath="+subPom.getPath());
 					if (subPom.exists()) {
 						try {
 							FileReader fileReader = new FileReader(subPom);
