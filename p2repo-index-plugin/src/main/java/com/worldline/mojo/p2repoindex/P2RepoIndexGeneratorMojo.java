@@ -214,26 +214,27 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 					String featureVersion = "<UNDEF>";
 					String featureId = "<UNDEF>";
 					boolean isFeature = false;
-
-					for (Object o1 : unitProperties.getChildren("property")) {
-						Element property = (Element) o1;
-						if ("org.eclipse.equinox.p2.name".equals(property.getAttributeValue("name"))) {
-							featureName = property.getAttributeValue("value");
+					if (unitProperties != null) {
+						for (Object o1 : unitProperties.getChildren("property")) {
+							Element property = (Element) o1;
+							if ("org.eclipse.equinox.p2.name".equals(property.getAttributeValue("name"))) {
+								featureName = property.getAttributeValue("value");
+							}
 						}
 					}
-
-					for (Object o2 : unitProvides.getChildren("provided")) {
-						Element provided = (Element) o2;
-						if ("org.eclipse.equinox.p2.eclipse.type".equals(provided.getAttributeValue("namespace"))
-								&& "feature".equals(provided.getAttributeValue("name"))) {
-							isFeature = true;
-						}
-						if ("org.eclipse.update.feature".equals(provided.getAttributeValue("namespace"))) {
-							featureId = provided.getAttributeValue("name");
-							featureVersion = provided.getAttributeValue("version");
+					if (unitProvides != null) {
+						for (Object o2 : unitProvides.getChildren("provided")) {
+							Element provided = (Element) o2;
+							if ("org.eclipse.equinox.p2.eclipse.type".equals(provided.getAttributeValue("namespace"))
+									&& "feature".equals(provided.getAttributeValue("name"))) {
+								isFeature = true;
+							}
+							if ("org.eclipse.update.feature".equals(provided.getAttributeValue("namespace"))) {
+								featureId = provided.getAttributeValue("name");
+								featureVersion = provided.getAttributeValue("version");
+							}
 						}
 					}
-
 					if (isFeature) {
 						System.out.println("Found feature: " + featureId + ", " + featureName + ", " + featureVersion);
 						repositoryDescriptor.getFeatureDescriptors().add(
