@@ -45,17 +45,21 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		getLog().info(String.format("Input parameter [documentationURL=%s]", documentationURL));
 
 		String repoPath = repositoryPath;
-		File effectiveMavenProject = null;
-		try {
-			effectiveMavenProject = locateRepositoryProject(this.mavenProject.getFile());
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-		if (repoPath == null && effectiveMavenProject != null) {
-			getLog().debug("Repository Path is null but not Maven Project. Will resolve Repository Path from it");
-			String basedirPath = effectiveMavenProject.getPath();
-			repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator).concat("repository");
-			getLog().info("Repository Path URL is now " + repoPath);
+
+		if (repoPath == null && this.mavenProject != null) {
+			File effectiveMavenProject = null;
+			try {
+				effectiveMavenProject = locateRepositoryProject(this.mavenProject.getFile());
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			if (effectiveMavenProject != null) {
+				getLog().debug("Repository Path is null but not Maven Project. Will resolve Repository Path from it");
+				String basedirPath = effectiveMavenProject.getPath();
+				repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
+						.concat("repository");
+				getLog().info("Repository Path URL is now " + repoPath);
+			}
 		}
 
 		String projectURL = documentationURL;
