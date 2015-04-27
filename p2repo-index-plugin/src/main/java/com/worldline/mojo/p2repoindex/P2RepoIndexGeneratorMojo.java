@@ -38,7 +38,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		// To ensure there is no error.
 
 		String repoPath = repositoryPath;
-		if (repoPath == null && this.mavenProject != null) {
+		MavenProject effectiveMavenProject = locateEffectiveMavenProject(this.mavenProject);
+		if (repoPath == null && effectiveMavenProject != null) {
+
 			String basedirPath = this.mavenProject.getBasedir().getPath();
 			repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator).concat("repository");
 		}
@@ -107,6 +109,26 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			return;
 		}
 
+	}
+
+	private MavenProject locateEffectiveMavenProject(MavenProject mavenProject) {
+		if (mavenProject == null) {
+			return null;
+		}
+		if ("pom".equals(mavenProject.getPackaging())) {
+			for (Object o : mavenProject.getModules()) {
+				if (o instanceof MavenProject) {
+					MavenProject module = (MavenProject) o;
+					if ("eclipse-repository".equals(module.getPackaging())) {
+						getLog().info("Located repository from parent: " + module.getArtifactId());
+						return module;
+					} else if ("pom".equals(module.getPackaging())) {
+						return locateEffectiveMavenProject(module);
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	private RepositoryDescriptor getRepositoryDescriptor(String repoPath) {
