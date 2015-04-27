@@ -91,7 +91,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 			String builtInformation = "";
 			try {
-				builtInformation = ", for an Update Dite built on "
+				builtInformation = ", for an Update Site built on "
 						+ new Date(Long.parseLong(repositoryDescriptor.getTimestamp()));
 			} catch (NumberFormatException nfe) {
 			}
