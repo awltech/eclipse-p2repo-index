@@ -3,6 +3,7 @@ package com.worldline.mojo.p2repoindex;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,12 +12,14 @@ import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -42,10 +45,15 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		getLog().info(String.format("Input parameter [documentationURL=%s]", documentationURL));
 
 		String repoPath = repositoryPath;
-		MavenProject effectiveMavenProject = locateEffectiveMavenProject(this.mavenProject);
+		File effectiveMavenProject = null;
+		try {
+			effectiveMavenProject = locateRepositoryProject(this.mavenProject.getFile());
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 		if (repoPath == null && effectiveMavenProject != null) {
 			getLog().debug("Repository Path is null but not Maven Project. Will resolve Repository Path from it");
-			String basedirPath = this.mavenProject.getBasedir().getPath();
+			String basedirPath = effectiveMavenProject.getPath();
 			repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator).concat("repository");
 			getLog().info("Repository Path URL is now " + repoPath);
 		}
@@ -116,19 +124,47 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 	}
 
-	private MavenProject locateEffectiveMavenProject(MavenProject mavenProject) {
+	private MavenProject read(File pomFile) throws Exception {
+		if (pomFile == null || !pomFile.exists()) {
+			return null;
+		}
+
+		FileReader reader = new FileReader(pomFile);
+		MavenProject project = new MavenProject(new MavenXpp3Reader().read(reader));
+		reader.close();
+		return project;
+	}
+
+	private File locateRepositoryProject(File mavenProjectFile) throws Exception {
+		System.out.println(mavenProjectFile.getPath());
 		if (mavenProject == null) {
 			return null;
 		}
-		if ("pom".equals(mavenProject.getPackaging())) {
+		MavenProject mavenProject = read(mavenProjectFile);
+		System.out.println(mavenProject);
+		if (mavenProject != null && "pom".equals(mavenProject.getPackaging())) {
 			for (Object o : mavenProject.getModules()) {
-				if (o instanceof MavenProject) {
-					MavenProject module = (MavenProject) o;
-					if ("eclipse-repository".equals(module.getPackaging())) {
-						getLog().info("Located repository from parent: " + module.getArtifactId());
-						return module;
-					} else if ("pom".equals(module.getPackaging())) {
-						return locateEffectiveMavenProject(module);
+				if (o instanceof String) {
+					String moduleAsString = (String) o;
+					File subPom = new File(mavenProjectFile.getParentFile().getPath() + File.separator + moduleAsString
+							+ File.separator + "pom.xml");
+					System.out.println("subpompath="+subPom.getPath());
+					if (subPom.exists()) {
+						try {
+							FileReader fileReader = new FileReader(subPom);
+							MavenProject module = new MavenProject(new MavenXpp3Reader().read(fileReader));
+							if ("eclipse-repository".equals(module.getPackaging())) {
+								getLog().info("Located repository from parent: " + module.getArtifactId());
+								return subPom.getParentFile();
+							} else if ("pom".equals(module.getPackaging())) {
+								return locateRepositoryProject(subPom);
+							}
+							fileReader.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (XmlPullParserException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
