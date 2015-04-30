@@ -250,7 +250,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 						}
 					}
 					if (isFeature) {
-						System.out.println("Found feature: " + featureId + ", " + featureName + ", " + featureVersion);
+						getLog().info("Found feature: " + featureId + ", " + featureName + ", " + featureVersion);
 						repositoryDescriptor.getFeatureDescriptors().add(
 								new FeatureDescriptor(featureId, featureName, featureVersion));
 					}
