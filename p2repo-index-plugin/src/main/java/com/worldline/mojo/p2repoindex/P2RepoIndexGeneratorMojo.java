@@ -134,6 +134,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				writer.write("body {margin: 5px; text-align: left; font-family: verdana, arial, sans-serif; font-size: 0.8em; color: #333; background-color: #EEE;}\n");
 				writer.write("td { font-size: 0.8em;}");
 				writer.close();
+				getLog().info("Style file generated successfully at " + index.getPath() + ".");
 			}
 		} catch (IOException e) {
 			getLog().error("Could not write style file because of " + e.getMessage() + ".", e);
