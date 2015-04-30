@@ -88,7 +88,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(index));
-			writer.write("<head><title>" + repositoryDescriptor.getName() + " Eclipse Update Site</title></head>\n");
+			writer.write("<head><link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"><title>" + repositoryDescriptor.getName() + " Eclipse Update Site</title></head>\n");
 			writer.write("<body><div><section><h3>\n");
 			writer.write("Welcome on the \"" + repositoryDescriptor.getName() + "\" Eclipse Update Site !\n");
 			writer.write("</h3></section><section><p>\n");
@@ -123,6 +123,20 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			writer.close();
 		} catch (IOException e) {
 			getLog().error("Could not write index file because of " + e.getMessage() + ".", e);
+			return;
+		}
+		
+		try {
+			File f = new File(index.getParentFile().getPath()+File.separator+"style.css");
+			if (!f.exists()) {
+				f.createNewFile();
+				BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+				writer.write("body {margin: 5px; text-align: left; font-family: verdana, arial, sans-serif; font-size: 0.8em; color: #333; background-color: #EEE;}\n");
+				writer.write("td { font-size: 0.8em;}");
+				writer.close();
+			}
+		} catch (IOException e) {
+			getLog().error("Could not write style file because of " + e.getMessage() + ".", e);
 			return;
 		}
 
