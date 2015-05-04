@@ -38,7 +38,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	@Parameter(required = false, property = "documentationUrl")
 	private String documentationURL;
 
-	private SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy 'at' H:mm z");
+	private SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy 'at' h:mm a z");
 	
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		// To ensure there is no error.
@@ -287,8 +287,4 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		return repositoryDescriptor;
 	}
 
-	public static void main(String[] args) {
-		System.out.println(new SimpleDateFormat("MMMM d, yyyy 'at' H:mm z").format(new Date()));
-	}
-	
 }
