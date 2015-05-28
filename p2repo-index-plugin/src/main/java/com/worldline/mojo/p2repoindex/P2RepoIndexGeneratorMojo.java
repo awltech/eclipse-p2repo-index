@@ -239,7 +239,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 							if ("org.eclipse.equinox.p2.name".equals(property.getAttributeValue("name"))) {
 								featureName = property.getAttributeValue("value");
 							}
-							if ("df_LT.featureName".equals(property.getAttribute("name"))) {
+							if ("df_LT.featureName".equals(property.getAttributeValue("name"))) {
 								featureI18nId = property.getAttributeValue("value");
 							}
 						}
