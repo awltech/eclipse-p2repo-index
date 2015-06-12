@@ -1,0 +1,12 @@
+body {
+	margin: 5px;
+	text-align: left;
+	font-family: verdana, arial, sans-serif;
+	font-size: 0.8em;
+	color: #333;
+	background-color: #EEE;
+}
+
+td {
+	font-size: 0.8em;
+}
