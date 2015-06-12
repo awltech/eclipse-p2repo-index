@@ -20,7 +20,7 @@
 		</section>
 		<section>
 			<p>
-				<h3>Available features within this update site:</h3>
+				<h3>Below are the available features, proposed by this Update Site:</h3>
 			</p>
 			<p>
 				<table border="1">
@@ -42,7 +42,7 @@
 				</table>
 			</p>
 			<p>
-				<div><i>(<a href="https://github.com/awltech/eclipse-p2repo-index">Generated</a> upon an Update Site built on $dateSite.)</i></div>
+				<div><i>(<a href="https://github.com/awltech/eclipse-p2repo-index">This page has been generated</a> upon an Update Site built on $dateSite.)</i></div>
 			</p>
 		</section>
 	</div>
