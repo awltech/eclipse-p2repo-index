@@ -217,12 +217,16 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 					String featureVersion = null;
 					String featureId = null;
 					String featureI18nId = null;
+					String providerName = null;
 					boolean isFeature = false;
 					if (unitProperties != null) {
 						for (Object o1 : unitProperties.getChildren("property")) {
 							Element property = (Element) o1;
 							if ("org.eclipse.equinox.p2.name".equals(property.getAttributeValue("name"))) {
 								featureName = property.getAttributeValue("value");
+							}
+							if ("org.eclipse.equinox.p2.provider".equals(property.getAttributeValue("name"))) {
+								providerName = property.getAttributeValue("value");
 							}
 							if ("df_LT.featureName".equals(property.getAttributeValue("name"))) {
 								featureI18nId = property.getAttributeValue("value");
@@ -239,14 +243,16 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 							if ("org.eclipse.update.feature".equals(provided.getAttributeValue("namespace"))) {
 								featureId = provided.getAttributeValue("name");
 								featureVersion = provided.getAttributeValue("version");
+
 							}
 						}
 					}
 					if (isFeature) {
 						String effectiveName = featureI18nId != null ? featureI18nId : featureName;
-						getLog().info("Found feature: " + featureId + ", " + effectiveName + ", " + featureVersion);
-						repositoryDescriptor.getFeatureDescriptors().add(
-								new FeatureDescriptor(featureId, effectiveName, featureVersion));
+						FeatureDescriptor featureDescriptor = new FeatureDescriptor(featureId, effectiveName,
+								featureVersion, providerName);
+						getLog().info("Found feature: " + featureDescriptor);
+						repositoryDescriptor.getFeatureDescriptors().add(featureDescriptor);
 					}
 				}
 

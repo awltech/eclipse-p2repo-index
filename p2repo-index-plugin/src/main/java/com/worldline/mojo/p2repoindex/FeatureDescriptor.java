@@ -8,11 +8,14 @@ public class FeatureDescriptor implements Comparable<FeatureDescriptor> {
 
 	private String version;
 
-	public FeatureDescriptor(String id, String name, String version) {
+	private String provider;
+
+	public FeatureDescriptor(String id, String name, String version, String provider) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
+		this.provider = provider;
 	}
 
 	public String getId() {
@@ -31,9 +34,13 @@ public class FeatureDescriptor implements Comparable<FeatureDescriptor> {
 		return id.compareTo(o.id);
 	}
 
+	public String getProvider() {
+		return this.provider;
+	}
+
 	@Override
 	public String toString() {
-		return String.format("[ID: %s, VERSION: %s, NAME: %s]", id, version, name);
+		return String.format("[ID: %s, VERSION: %s, NAME: %s, PROVIDER: %s]", id, version, name, provider);
 	}
 
 }
