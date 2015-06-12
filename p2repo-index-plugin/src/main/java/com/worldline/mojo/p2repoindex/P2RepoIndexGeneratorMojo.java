@@ -115,15 +115,13 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		try {
 			File f = new File(index.getParentFile().getPath() + File.separator + "style.css");
-			if (!f.exists()) {
-				f.createNewFile();
-				VelocityContext context = new VelocityContext();
-				Template template = ve.getTemplate("style.css.vm");
-				FileWriter fileWriter = new FileWriter(f);
-				template.merge(context, fileWriter);
-				fileWriter.close();
-				getLog().info("Style file generated successfully at " + f.getPath() + ".");
-			}
+			f.createNewFile();
+			VelocityContext context = new VelocityContext();
+			Template template = ve.getTemplate("style.css.vm");
+			FileWriter fileWriter = new FileWriter(f);
+			template.merge(context, fileWriter);
+			fileWriter.close();
+			getLog().info("Style file generated successfully at " + f.getPath() + ".");
 		} catch (IOException e) {
 			getLog().error("Could not write style file because of " + e.getMessage() + ".", e);
 			return;
