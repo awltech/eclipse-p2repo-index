@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -41,11 +42,13 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 	@Parameter(required = false, property = "documentationUrl")
 	private String documentationURL;
-
-	private SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy 'at' h:mm a z");
+	
+	private static final String VERSION = "0.1.3-SNAPSHOT";
 
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		// To ensure there is no error.
+		SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM d, yyyy 'at' h:mm a z");
+		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
 		getLog().info(String.format("Input parameter [mavenProject=%s]", mavenProject));
 		getLog().info(String.format("Input parameter [repositoryPath=%s]", repositoryPath));
@@ -101,8 +104,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			VelocityContext context = new VelocityContext();
 			context.put("repositoryDescriptor", repositoryDescriptor);
 			context.put("projectURL", projectURL);
-			context.put("dateNow", sdf.format(new Date()));
+			context.put("dateNow", new Date());
 			context.put("dateSite", sdf.format(new Date(Long.parseLong(repositoryDescriptor.getTimestamp()))));
+			context.put("version", VERSION);
 			Template template = ve.getTemplate("index.html.vm");
 			FileWriter fileWriter = new FileWriter(index);
 			template.merge(context, fileWriter);
@@ -117,6 +121,8 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			File f = new File(index.getParentFile().getPath() + File.separator + "style.css");
 			f.createNewFile();
 			VelocityContext context = new VelocityContext();
+			context.put("dateNow", new Date());
+			context.put("version", VERSION);
 			Template template = ve.getTemplate("style.css.vm");
 			FileWriter fileWriter = new FileWriter(f);
 			template.merge(context, fileWriter);
