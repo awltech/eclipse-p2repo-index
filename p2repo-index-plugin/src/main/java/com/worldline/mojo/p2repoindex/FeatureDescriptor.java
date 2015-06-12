@@ -12,10 +12,10 @@ public class FeatureDescriptor implements Comparable<FeatureDescriptor> {
 
 	public FeatureDescriptor(String id, String name, String version, String provider) {
 		super();
-		this.id = id;
-		this.name = name;
-		this.version = version;
-		this.provider = provider;
+		this.id = id != null ? id : "";
+		this.name = name != null ? name : "";
+		this.version = version != null ? version : "";
+		this.provider = provider != null ? provider : "";
 	}
 
 	public String getId() {
