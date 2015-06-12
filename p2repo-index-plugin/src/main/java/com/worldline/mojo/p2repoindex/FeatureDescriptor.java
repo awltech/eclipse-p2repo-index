@@ -31,7 +31,7 @@ public class FeatureDescriptor implements Comparable<FeatureDescriptor> {
 	}
 
 	public int compareTo(FeatureDescriptor o) {
-		return id.compareTo(o.id);
+		return id.compareTo(o.id) != 0 ? id.compareTo(o.id) : version.compareTo(o.version);
 	}
 
 	public String getProvider() {
