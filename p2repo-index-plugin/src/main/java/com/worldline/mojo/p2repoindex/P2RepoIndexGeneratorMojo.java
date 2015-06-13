@@ -222,6 +222,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 					String featureId = null;
 					String featureI18nId = null;
 					String providerName = null;
+					String providerI18NName = null;
 					boolean isFeature = false;
 					if (unitProperties != null) {
 						for (Object o1 : unitProperties.getChildren("property")) {
@@ -234,6 +235,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 							}
 							if ("df_LT.featureName".equals(property.getAttributeValue("name"))) {
 								featureI18nId = property.getAttributeValue("value");
+							}
+							if ("df_LT.providerName".equals(property.getAttributeValue("name"))) {
+								providerI18NName = property.getAttributeValue("value");
 							}
 						}
 					}
@@ -253,8 +257,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 					}
 					if (isFeature) {
 						String effectiveName = featureI18nId != null ? featureI18nId : featureName;
+						String effectiveProvider = providerI18NName != null ? providerI18NName : providerName;
 						FeatureDescriptor featureDescriptor = new FeatureDescriptor(featureId, effectiveName,
-								featureVersion, providerName);
+								featureVersion, effectiveProvider);
 						getLog().info("Found feature: " + featureDescriptor);
 						repositoryDescriptor.getFeatureDescriptors().add(featureDescriptor);
 					}
