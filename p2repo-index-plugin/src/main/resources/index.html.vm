@@ -28,15 +28,15 @@
 						<th>Name</th>
 						<th>Version</th>
 						<th>Identifier</th>
-						<!--<th>Provider</th>-->
+						<th>Provider</th>
 					</tr>
 
 #foreach ($feature in $repositoryDescriptor.featureDescriptors)
 					<tr>
 						<td><b>$feature.name</b></td>
-						<td><b>$feature.version</b></td>
+						<td>$feature.version</td>
 						<td>$feature.id</td>
-						<!--<td>$feature.provider</td>-->
+						<td>$feature.provider</td>
 					</tr>
 #end
 				</table>
