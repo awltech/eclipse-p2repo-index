@@ -31,37 +31,58 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+/**
+ * Maven Mojo that generates index.html file on Eclipse Repository, to prevent
+ * from 404 errors when trying to access site from browser.
+ * 
+ * @author mvanbesien (mvaawl@gmail.com)
+ *
+ */
 @Mojo(name = "generate-index", requiresProject = false)
 public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
+	/**
+	 * Maven project gathered from Mojo execution. Used to locate repository
+	 * when URL is not explicitely specified.
+	 */
 	@Parameter(required = false, defaultValue = "${project}")
 	private MavenProject mavenProject;
 
+	/**
+	 * User variable, used to force repository path
+	 */
 	@Parameter(required = false, property = "repositoryPath")
 	private String repositoryPath;
 
+	/**
+	 * User variable, used to force project documentation URL
+	 */
 	@Parameter(required = false, property = "documentationUrl")
 	private String documentationURL;
-	
+
 	private static final String VERSION = "0.1.3-SNAPSHOT";
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.apache.maven.plugin.AbstractMojo#execute()
+	 */
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		// To ensure there is no error.
+
 		SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM d, yyyy 'at' h:mm a z");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+		getLog().debug(String.format("Input parameter [mavenProject=%s]", mavenProject));
+		getLog().debug(String.format("Input parameter [repositoryPath=%s]", repositoryPath));
+		getLog().debug(String.format("Input parameter [documentationURL=%s]", documentationURL));
 
-		getLog().info(String.format("Input parameter [mavenProject=%s]", mavenProject));
-		getLog().info(String.format("Input parameter [repositoryPath=%s]", repositoryPath));
-		getLog().info(String.format("Input parameter [documentationURL=%s]", documentationURL));
-
+		// Locates the repository project.
 		String repoPath = repositoryPath;
-
 		if (repoPath == null && this.mavenProject != null) {
 			File effectiveMavenProject = null;
 			try {
 				effectiveMavenProject = locateRepositoryProject(this.mavenProject.getFile());
 			} catch (Exception e1) {
-				e1.printStackTrace();
+				getLog().warn("Encountered Error while locating maven project !", e1);
 			}
 			if (effectiveMavenProject != null) {
 				getLog().debug("Repository Path is null but not Maven Project. Will resolve Repository Path from it");
@@ -82,25 +103,19 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			return;
 		}
 
-		File index = new File(repoPath.concat(File.separator).concat("index.html"));
-		try {
-			index.createNewFile();
-		} catch (IOException e) {
-			getLog().error("Could not create index file because of " + e.getMessage() + ".", e);
-			return;
-		}
+		RepositoryDescriptor repositoryDescriptor = getRepositoryDescriptor(repoPath);
+		Collections.sort(repositoryDescriptor.getFeatureDescriptors());
 
-		// Generate index.html file, to prevent from 404 error when browsing
-		// repository.
-
+		// Initializes Velocity
 		VelocityEngine ve = new VelocityEngine();
 		ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
 		ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
 		ve.init();
 
-		RepositoryDescriptor repositoryDescriptor = getRepositoryDescriptor(repoPath);
-		Collections.sort(repositoryDescriptor.getFeatureDescriptors());
+		// Generate index.html file using velocity template
 		try {
+			File index = new File(repoPath.concat(File.separator).concat("index.html"));
+			index.createNewFile();
 			VelocityContext context = new VelocityContext();
 			context.put("repositoryDescriptor", repositoryDescriptor);
 			context.put("projectURL", projectURL);
@@ -117,8 +132,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			return;
 		}
 
+		// Creates empty style.css file & generates its contents using velocity
 		try {
-			File f = new File(index.getParentFile().getPath() + File.separator + "style.css");
+			File f = new File(repoPath.concat(File.separator).concat("style.css"));
 			f.createNewFile();
 			VelocityContext context = new VelocityContext();
 			context.put("dateNow", new Date());
@@ -135,6 +151,13 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 	}
 
+	/**
+	 * Takes files and loads it into Maven project.
+	 * 
+	 * @param pomFile
+	 * @return
+	 * @throws Exception
+	 */
 	private MavenProject read(File pomFile) throws Exception {
 		if (pomFile == null || !pomFile.exists()) {
 			return null;
@@ -146,6 +169,14 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		return project;
 	}
 
+	/**
+	 * Locates the repository project from its parent, identified by parent's
+	 * pom file passed as parameter
+	 * 
+	 * @param mavenProjectFile
+	 * @return
+	 * @throws Exception
+	 */
 	private File locateRepositoryProject(File mavenProjectFile) throws Exception {
 		if (mavenProject == null) {
 			return null;
@@ -169,9 +200,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 							}
 							fileReader.close();
 						} catch (IOException e) {
-							e.printStackTrace();
+							getLog().warn("Exception encountered while locating repository project", e);
 						} catch (XmlPullParserException e) {
-							e.printStackTrace();
+							getLog().warn("Exception encountered while locating repository project", e);
 						}
 					}
 				}
@@ -180,22 +211,29 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		return null;
 	}
 
+	/**
+	 * Loads data model, describing the repository, from the content.xml
+	 * contents
+	 * 
+	 * @param repoPath
+	 * @return
+	 */
 	private RepositoryDescriptor getRepositoryDescriptor(String repoPath) {
 		RepositoryDescriptor repositoryDescriptor = new RepositoryDescriptor();
 		InputStream contentsFileInputStream = null;
 		ZipFile zipFile = null;
 		try {
-
 			File xmlFile = new File(repoPath + "/content.xml");
-			if (xmlFile != null && xmlFile.exists())
+			if (xmlFile != null && xmlFile.exists()) {
 				contentsFileInputStream = new FileInputStream(xmlFile);
-
-			File jarFile = new File(repoPath + "/content.jar");
-			if (jarFile != null && jarFile.exists()) {
-				zipFile = new ZipFile(jarFile);
-				ZipEntry entry = zipFile.getEntry("content.xml");
-				if (entry != null) {
-					contentsFileInputStream = zipFile.getInputStream(entry);
+			} else {
+				File jarFile = new File(repoPath + "/content.jar");
+				if (jarFile != null && jarFile.exists()) {
+					zipFile = new ZipFile(jarFile);
+					ZipEntry entry = zipFile.getEntry("content.xml");
+					if (entry != null) {
+						contentsFileInputStream = zipFile.getInputStream(entry);
+					}
 				}
 			}
 			if (contentsFileInputStream != null) {
@@ -251,7 +289,6 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 							if ("org.eclipse.update.feature".equals(provided.getAttributeValue("namespace"))) {
 								featureId = provided.getAttributeValue("name");
 								featureVersion = provided.getAttributeValue("version");
-
 							}
 						}
 					}
@@ -267,29 +304,26 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 				return repositoryDescriptor;
 			}
-
 		} catch (IOException e) {
-			e.printStackTrace();
+			getLog().warn("Encountered exception while reading repository information", e);
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			getLog().warn("Encountered exception while reading repository information", e);
 		} finally {
 			if (contentsFileInputStream != null) {
 				try {
 					contentsFileInputStream.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					getLog().warn("Encountered exception while reading repository information", e);
 				}
 			}
 			if (zipFile != null) {
 				try {
 					zipFile.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					getLog().warn("Encountered exception while reading repository information", e);
 				}
 			}
 		}
-
 		return repositoryDescriptor;
 	}
-
 }
