@@ -88,7 +88,7 @@ public class FeatureDescriptor implements Comparable<FeatureDescriptor> {
 	 */
 	@Override
 	public String toString() {
-		return String.format("[ID: %s, VERSION: %s, NAME: %s, PROVIDER: %s]", id, version, name, provider);
+		return String.format("%s (%s)", id, version);
 	}
 
 }

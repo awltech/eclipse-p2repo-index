@@ -43,7 +43,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 	/**
 	 * Maven project gathered from Mojo execution. Used to locate repository
-	 * when URL is not explicitely specified.
+	 * when URL is not explicitly specified.
 	 */
 	@Parameter(required = false, defaultValue = "${project}")
 	private MavenProject mavenProject;
@@ -69,11 +69,11 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	 */
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
-		SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM d, yyyy 'at' h:mm a z");
+		SimpleDateFormat sdf = new SimpleDateFormat("EEEE d MMMM yyyy 'at' h:mm a z");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-		getLog().info(String.format("Input parameter [mavenProject=%s]", mavenProject));
-		getLog().info(String.format("Input parameter [repositoryPath=%s]", repositoryPath));
-		getLog().info(String.format("Input parameter [documentationURL=%s]", documentationURL));
+		getLog().debug(String.format("Input parameter [mavenProject=%s]", mavenProject));
+		getLog().debug(String.format("Input parameter [repositoryPath=%s]", repositoryPath));
+		getLog().debug(String.format("Input parameter [documentationURL=%s]", documentationURL));
 
 		// Locates the repository project.
 		String repoPath = repositoryPath;
@@ -89,9 +89,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				String basedirPath = effectiveMavenProject.getPath();
 				repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
 						.concat("repository");
-				getLog().info("Repository Path URL is now " + repoPath);
 			}
 		}
+		getLog().info("Processing Eclipse repository at path: " + repoPath);
 
 		String projectURL = documentationURL;
 		if (projectURL == null && this.mavenProject != null) {
@@ -99,7 +99,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		}
 
 		if (repoPath == null || !new File(repoPath).exists()) {
-			getLog().error("Cannot resolve Repository Path at all. Aborts.");
+			getLog().error("Cannot resolve Repository Path. Aborts.");
 			return;
 		}
 
@@ -193,7 +193,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 							FileReader fileReader = new FileReader(subPom);
 							MavenProject module = new MavenProject(new MavenXpp3Reader().read(fileReader));
 							if ("eclipse-repository".equals(module.getPackaging())) {
-								getLog().info("Located repository from parent: " + module.getArtifactId());
+								getLog().debug("Located repository from parent: " + module.getArtifactId());
 								return subPom.getParentFile();
 							} else if ("pom".equals(module.getPackaging())) {
 								return locateRepositoryProject(subPom);
@@ -208,6 +208,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				}
 			}
 		}
+		getLog().debug(
+				"Couldn't locate any repository from parent: "
+						+ (mavenProject != null ? mavenProject.getArtifactId() : "<UNDEF>"));
 		return null;
 	}
 
@@ -297,7 +300,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 						String effectiveProvider = providerI18NName != null ? providerI18NName : providerName;
 						FeatureDescriptor featureDescriptor = new FeatureDescriptor(featureId, effectiveName,
 								featureVersion, effectiveProvider);
-						getLog().info("Found feature: " + featureDescriptor);
+						getLog().info("Added feature: " + featureDescriptor);
 						repositoryDescriptor.getFeatureDescriptors().add(featureDescriptor);
 					}
 				}
