@@ -240,7 +240,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				}
 			}
 			if (contentsFileInputStream != null) {
-				return UpdateSiteDescriptorReader.read(contentsFileInputStream);
+				return UpdateSiteDescriptorReader.read(contentsFileInputStream, getLog());
 			}
 		} catch (IOException e) {
 			getLog().warn("Encountered exception while reading repository information", e);

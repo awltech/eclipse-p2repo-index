@@ -1,5 +1,7 @@
 package com.worldline.mojo.p2repoindex;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -7,7 +9,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -32,9 +37,15 @@ public class UpdateSiteDescriptorReader {
 	 */
 	private final RepositoryDescriptor repositoryDescriptor = new RepositoryDescriptor();
 
+	/**
+	 * Logger instance
+	 */
+	private Log log;
+
 	// Private constructor. static method should be used
-	private UpdateSiteDescriptorReader(InputStream updateSiteDescriptorStream) {
+	private UpdateSiteDescriptorReader(InputStream updateSiteDescriptorStream, Log log) {
 		this.updateSiteDescriptorStream = updateSiteDescriptorStream;
+		this.log = log;
 	}
 
 	/**
@@ -42,12 +53,14 @@ public class UpdateSiteDescriptorReader {
 	 * repository descriptor associated with it.
 	 * 
 	 * @param updateSiteDescriptorStream
+	 * @param log
 	 * @return
 	 * @throws IOException
 	 * @throws JDOMException
 	 */
-	public static RepositoryDescriptor read(InputStream updateSiteDescriptorStream) throws IOException, JDOMException {
-		UpdateSiteDescriptorReader reader = new UpdateSiteDescriptorReader(updateSiteDescriptorStream);
+	public static RepositoryDescriptor read(InputStream updateSiteDescriptorStream, Log log) throws IOException,
+			JDOMException {
+		UpdateSiteDescriptorReader reader = new UpdateSiteDescriptorReader(updateSiteDescriptorStream, log);
 		reader.doRead();
 		return reader.repositoryDescriptor;
 	}
@@ -81,15 +94,19 @@ public class UpdateSiteDescriptorReader {
 		for (Iterator<?> iterator = repository.getChild("units").getChildren("unit").iterator(); iterator.hasNext();) {
 			Element unit = (Element) iterator.next();
 			if (UpdateSiteDescriptorReader.isCategory(unit)) {
+				String id = unit.getAttributeValue("id");
 				categoryUnits.add(unit);
+				this.log.info("Found Category unit with id: " + id);
 			} else if (UpdateSiteDescriptorReader.isGroup(unit)) {
 				String id = unit.getAttributeValue("id");
 				String version = unit.getAttributeValue("version");
 				groupMappings.put(new P2Identifier(id, version), toGroupMapping(unit));
+				this.log.info("Found Group unit with id: " + id + " and version: " + version);
 			} else if (UpdateSiteDescriptorReader.isFeature(unit)) {
 				String id = unit.getAttributeValue("id");
 				String version = unit.getAttributeValue("version");
 				featureUnits.put(new P2Identifier(id, version), toFeatureDescriptor(unit));
+				this.log.info("Found Feature unit with id: " + id + " and version: " + version);
 			}
 		}
 
@@ -117,13 +134,18 @@ public class UpdateSiteDescriptorReader {
 					if ("org.eclipse.equinox.p2.iu".equals(provided.getAttributeValue("namespace"))) {
 						String groupName = provided.getAttributeValue("name");
 						String groupRange = provided.getAttributeValue("range");
-						GroupMapping groupMapping = groupMappings
-								.get(new P2Identifier(groupName, fromRange(groupRange)));
+						// Coming line is a patch, that seems to come when there is aggregation...
+						GroupMapping groupMapping = "1.0.0.qualifier".equals(groupRange) ? getGroupMappingByKeyOnly(
+								groupMappings, groupName) : groupMappings.get(new P2Identifier(groupName,
+								fromRange(groupRange)));
 						if (groupMapping != null) {
+							this.log.info("Found group Mapping " + groupName + " for category "
+									+ categoryDescriptor.getName());
 							for (P2Identifier featureId : groupMapping.getInstalledFeatureIDs()) {
 								FeatureDescriptor featureDescriptor = featureUnits.get(featureId);
 								if (featureDescriptor != null) {
 									categoryDescriptor.getFeatureDescriptors().add(featureDescriptor);
+									this.log.info("Found feature " + featureId.getName() + " for group " + groupName);
 								}
 							}
 						}
@@ -131,6 +153,15 @@ public class UpdateSiteDescriptorReader {
 				}
 			}
 		}
+	}
+
+	private GroupMapping getGroupMappingByKeyOnly(Map<P2Identifier, GroupMapping> groupMappings, String groupName) {
+		for (Entry<P2Identifier, GroupMapping> entry : groupMappings.entrySet()) {
+			if (groupName.equals(entry.getKey().getName())) {
+				return entry.getValue();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -150,6 +181,7 @@ public class UpdateSiteDescriptorReader {
 						&& required.getChildren("filter").size() > 0) {
 					String requiredName = required.getAttributeValue("name");
 					String requiredValue = required.getAttributeValue("range");
+					this.log.info("Added to group mapping " + identifier + " the feature with id " + requiredName);
 					groupMapping.getInstalledFeatureIDs().add(new P2Identifier(requiredName, fromRange(requiredValue)));
 				}
 			}
@@ -165,7 +197,9 @@ public class UpdateSiteDescriptorReader {
 	 */
 	private String fromRange(String version) {
 		if (version.startsWith("[") && version.endsWith("]") && version.indexOf(",") > 0) {
-			return version.substring(1, version.indexOf(","));
+			String substring = version.substring(1, version.indexOf(","));
+			substring = substring.substring(0, substring.lastIndexOf("."));
+			return substring;
 		}
 		return version;
 	}
@@ -272,6 +306,12 @@ public class UpdateSiteDescriptorReader {
 			}
 		}
 		return false;
+	}
+
+	public static void main(String[] args) throws Exception {
+		File file = new File("C:/Utilisateurs/A125788/Downloads/content.xml");
+		FileInputStream fis = new FileInputStream(file);
+		UpdateSiteDescriptorReader.read(fis, new SystemStreamLog());
 	}
 
 }
