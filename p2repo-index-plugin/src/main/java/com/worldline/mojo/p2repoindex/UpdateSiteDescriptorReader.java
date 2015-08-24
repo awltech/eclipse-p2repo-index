@@ -1,7 +1,5 @@
 package com.worldline.mojo.p2repoindex;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -15,10 +13,23 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+/**
+ * Utility class that takes a content.xml stream as input, and returns a
+ * descriptors object graph, for this repository.
+ * 
+ * @author mvanbesien (mvaawl@gmail.com)
+ *
+ */
 public class UpdateSiteDescriptorReader {
 
+	/**
+	 * Input of the processus
+	 */
 	private final InputStream updateSiteDescriptorStream;
 
+	/**
+	 * Output of the processus.
+	 */
 	private final RepositoryDescriptor repositoryDescriptor = new RepositoryDescriptor();
 
 	// Private constructor. static method should be used
@@ -26,16 +37,26 @@ public class UpdateSiteDescriptorReader {
 		this.updateSiteDescriptorStream = updateSiteDescriptorStream;
 	}
 
+	/**
+	 * Reads the stream, standing for a content.xml file, and returns the
+	 * repository descriptor associated with it.
+	 * 
+	 * @param updateSiteDescriptorStream
+	 * @return
+	 * @throws IOException
+	 * @throws JDOMException
+	 */
 	public static RepositoryDescriptor read(InputStream updateSiteDescriptorStream) throws IOException, JDOMException {
 		UpdateSiteDescriptorReader reader = new UpdateSiteDescriptorReader(updateSiteDescriptorStream);
 		reader.doRead();
-		return reader.getRepositoryDescriptor();
+		return reader.repositoryDescriptor;
 	}
 
-	private RepositoryDescriptor getRepositoryDescriptor() {
-		return this.repositoryDescriptor;
-	}
-
+	/**
+	 * Method that does perform the reading & scanning processes.
+	 * @throws IOException
+	 * @throws JDOMException
+	 */
 	private void doRead() throws IOException, JDOMException {
 		// Opens the file.
 		Document build = new SAXBuilder().build(this.updateSiteDescriptorStream);
@@ -48,7 +69,7 @@ public class UpdateSiteDescriptorReader {
 			}
 		}
 
-		// Processes the units to sort them by type.
+		// Processes the units to sort them by type. Processes the ones that can be processed independently.
 		Set<Element> categoryUnits = new HashSet<Element>();
 		Map<P2Identifier, FeatureDescriptor> featureUnits = new HashMap<P2Identifier, FeatureDescriptor>();
 		Map<P2Identifier, GroupMapping> groupMappings = new HashMap<P2Identifier, GroupMapping>();
@@ -92,7 +113,8 @@ public class UpdateSiteDescriptorReader {
 					if ("org.eclipse.equinox.p2.iu".equals(provided.getAttributeValue("namespace"))) {
 						String groupName = provided.getAttributeValue("name");
 						String groupRange = provided.getAttributeValue("range");
-						GroupMapping groupMapping = groupMappings.get(new P2Identifier(groupName, fromRange(groupRange)));
+						GroupMapping groupMapping = groupMappings
+								.get(new P2Identifier(groupName, fromRange(groupRange)));
 						if (groupMapping != null) {
 							for (P2Identifier featureId : groupMapping.getInstalledFeatureIDs()) {
 								FeatureDescriptor featureDescriptor = featureUnits.get(featureId);
@@ -106,7 +128,12 @@ public class UpdateSiteDescriptorReader {
 			}
 		}
 	}
-	
+
+	/**
+	 * Transforms XML Element into a group
+	 * @param unit
+	 * @return
+	 */
 	private GroupMapping toGroupMapping(Element unit) {
 		String identifier = unit.getAttributeValue("id");
 		GroupMapping groupMapping = new GroupMapping(identifier);
@@ -124,14 +151,24 @@ public class UpdateSiteDescriptorReader {
 		}
 		return groupMapping;
 	}
-	
+
+	/**
+	 * Transforms Range value into version
+	 * @param version
+	 * @return
+	 */
 	private String fromRange(String version) {
 		if (version.startsWith("[") && version.endsWith("]") && version.indexOf(",") > 0) {
 			return version.substring(1, version.indexOf(","));
 		}
 		return version;
 	}
-	
+
+	/**
+	 * returns true is the unit passed as parameter is an XML element for a p2 feature
+	 * @param unit
+	 * @return
+	 */
 	private static boolean isFeature(Element unit) {
 		Element provides = unit.getChild("provides");
 		if (provides != null) {
@@ -145,6 +182,11 @@ public class UpdateSiteDescriptorReader {
 		return false;
 	}
 
+	/**
+	 * Transforms XML Element into a feature
+	 * @param unit
+	 * @return
+	 */
 	private FeatureDescriptor toFeatureDescriptor(Element unit) {
 		String id = null;
 		String name = null;
@@ -183,6 +225,11 @@ public class UpdateSiteDescriptorReader {
 		return new FeatureDescriptor(id, name, version, provider);
 	}
 
+	/**
+	 * returns true is the unit passed as parameter is an XML element for a p2 group
+	 * @param unit
+	 * @return
+	 */
 	private static boolean isGroup(Element unit) {
 		Element properties = unit.getChild("properties");
 		if (properties != null) {
@@ -196,6 +243,11 @@ public class UpdateSiteDescriptorReader {
 		return false;
 	}
 
+	/**
+	 * returns true is the unit passed as parameter is an XML element for a p2 category
+	 * @param unit
+	 * @return
+	 */
 	private static boolean isCategory(Element unit) {
 		Element properties = unit.getChild("properties");
 		if (properties != null) {
@@ -207,12 +259,6 @@ public class UpdateSiteDescriptorReader {
 			}
 		}
 		return false;
-	}
-
-	public static void main(String[] args) throws Exception {
-		String fileName = "C:\\Utilisateurs\\A125788\\Desktop\\content.xml";
-		FileInputStream fis = new FileInputStream(new File(fileName));
-		UpdateSiteDescriptorReader.read(fis);
 	}
 
 }

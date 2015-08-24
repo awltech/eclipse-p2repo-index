@@ -1,34 +1,69 @@
 package com.worldline.mojo.p2repoindex;
 
+/**
+ * Technical class used to identify a p2 element. It is with its name and
+ * version
+ * 
+ * @author mvanbesien (mvaawl@gmail.com)
+ *
+ */
 public class P2Identifier {
 
-	private String id;
+	/**
+	 * Identifier name part
+	 */
+	private String name;
 
+	/**
+	 * Identifier version part
+	 */
 	private String version;
 
-	public String getId() {
-		return id;
+	/**
+	 * @return name part of the identifier
+	 */
+	public String getName() {
+		return name;
 	}
 
+	/**
+	 * @return version part of the identifier
+	 */
 	public String getVersion() {
 		return version;
 	}
 
-	public P2Identifier(String id, String version) {
+	/**
+	 * Creates new identifier
+	 * 
+	 * @param name
+	 * @param version
+	 */
+	public P2Identifier(String name, String version) {
 		super();
-		this.id = id;
+		this.name = name;
 		this.version = version;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		return result;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -38,10 +73,10 @@ public class P2Identifier {
 		if (getClass() != obj.getClass())
 			return false;
 		P2Identifier other = (P2Identifier) obj;
-		if (id == null) {
-			if (other.id != null)
+		if (name == null) {
+			if (other.name != null)
 				return false;
-		} else if (!id.equals(other.id))
+		} else if (!name.equals(other.name))
 			return false;
 		if (version == null) {
 			if (other.version != null)
