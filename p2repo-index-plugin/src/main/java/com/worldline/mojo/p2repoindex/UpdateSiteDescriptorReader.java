@@ -54,6 +54,7 @@ public class UpdateSiteDescriptorReader {
 
 	/**
 	 * Method that does perform the reading & scanning processes.
+	 * 
 	 * @throws IOException
 	 * @throws JDOMException
 	 */
@@ -65,11 +66,14 @@ public class UpdateSiteDescriptorReader {
 		for (Object o : repository.getChild("properties").getChildren("property")) {
 			Element e = (Element) o;
 			if ("p2.timestamp".equals(e.getAttributeValue("name"))) {
-				repositoryDescriptor.setTimestamp(e.getAttributeValue("value"));
+				String attributeValue = e.getAttributeValue("value");
+				repositoryDescriptor.setTimestamp(attributeValue != null && attributeValue.length() > 0 ? Long
+						.parseLong(attributeValue) : 0);
 			}
 		}
 
-		// Processes the units to sort them by type. Processes the ones that can be processed independently.
+		// Processes the units to sort them by type. Processes the ones that can
+		// be processed independently.
 		Set<Element> categoryUnits = new HashSet<Element>();
 		Map<P2Identifier, FeatureDescriptor> featureUnits = new HashMap<P2Identifier, FeatureDescriptor>();
 		Map<P2Identifier, GroupMapping> groupMappings = new HashMap<P2Identifier, GroupMapping>();
@@ -131,6 +135,7 @@ public class UpdateSiteDescriptorReader {
 
 	/**
 	 * Transforms XML Element into a group
+	 * 
 	 * @param unit
 	 * @return
 	 */
@@ -154,6 +159,7 @@ public class UpdateSiteDescriptorReader {
 
 	/**
 	 * Transforms Range value into version
+	 * 
 	 * @param version
 	 * @return
 	 */
@@ -165,7 +171,9 @@ public class UpdateSiteDescriptorReader {
 	}
 
 	/**
-	 * returns true is the unit passed as parameter is an XML element for a p2 feature
+	 * returns true is the unit passed as parameter is an XML element for a p2
+	 * feature
+	 * 
 	 * @param unit
 	 * @return
 	 */
@@ -184,6 +192,7 @@ public class UpdateSiteDescriptorReader {
 
 	/**
 	 * Transforms XML Element into a feature
+	 * 
 	 * @param unit
 	 * @return
 	 */
@@ -226,7 +235,9 @@ public class UpdateSiteDescriptorReader {
 	}
 
 	/**
-	 * returns true is the unit passed as parameter is an XML element for a p2 group
+	 * returns true is the unit passed as parameter is an XML element for a p2
+	 * group
+	 * 
 	 * @param unit
 	 * @return
 	 */
@@ -244,7 +255,9 @@ public class UpdateSiteDescriptorReader {
 	}
 
 	/**
-	 * returns true is the unit passed as parameter is an XML element for a p2 category
+	 * returns true is the unit passed as parameter is an XML element for a p2
+	 * category
+	 * 
 	 * @param unit
 	 * @return
 	 */

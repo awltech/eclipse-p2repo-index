@@ -118,7 +118,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			context.put("repositoryDescriptor", repositoryDescriptor);
 			context.put("projectURL", projectURL);
 			context.put("dateNow", new Date());
-			context.put("dateSite", sdf.format(new Date(Long.parseLong(repositoryDescriptor.getTimestamp()))));
+			context.put("dateSite", sdf.format(new Date(repositoryDescriptor.getTimestamp())));
 			Template template = ve.getTemplate("index.html.vm");
 			FileWriter fileWriter = new FileWriter(index);
 			template.merge(context, fileWriter);

@@ -19,7 +19,7 @@ public class RepositoryDescriptor {
 	/**
 	 * Repository timestamp
 	 */
-	private String timestamp;
+	private long timestamp;
 
 	/**
 	 * Features of repository
@@ -52,7 +52,7 @@ public class RepositoryDescriptor {
 	 * 
 	 * @return repository timestamp
 	 */
-	public String getTimestamp() {
+	public long getTimestamp() {
 		return timestamp;
 	}
 
@@ -60,7 +60,7 @@ public class RepositoryDescriptor {
 	 * @param repository
 	 *            timestamp
 	 */
-	public void setTimestamp(String timestamp) {
+	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
 
