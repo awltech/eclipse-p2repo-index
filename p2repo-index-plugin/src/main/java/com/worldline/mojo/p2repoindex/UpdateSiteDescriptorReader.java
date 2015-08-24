@@ -1,18 +1,15 @@
 package com.worldline.mojo.p2repoindex;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -306,12 +303,6 @@ public class UpdateSiteDescriptorReader {
 			}
 		}
 		return false;
-	}
-
-	public static void main(String[] args) throws Exception {
-		File file = new File("C:/Utilisateurs/A125788/Downloads/content.xml");
-		FileInputStream fis = new FileInputStream(file);
-		UpdateSiteDescriptorReader.read(fis, new SystemStreamLog());
 	}
 
 }
