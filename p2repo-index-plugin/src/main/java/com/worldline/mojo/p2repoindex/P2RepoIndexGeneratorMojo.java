@@ -178,30 +178,34 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			return null;
 		}
 		MavenProject mavenProject = read(mavenProjectFile);
-		if (mavenProject != null && "pom".equals(mavenProject.getPackaging())) {
-			for (Object o : mavenProject.getModules()) {
-				if (o instanceof String) {
-					String moduleAsString = (String) o;
-					File subPom = new File(mavenProjectFile.getParentFile().getPath() + File.separator + moduleAsString
-							+ File.separator + "pom.xml");
-					if (subPom.exists()) {
-						try {
-							FileReader fileReader = new FileReader(subPom);
-							MavenProject module = new MavenProject(new MavenXpp3Reader().read(fileReader));
-							if ("eclipse-repository".equals(module.getPackaging())) {
-								getLog().debug("Located repository from parent: " + module.getArtifactId());
-								return subPom.getParentFile();
-							} else if ("pom".equals(module.getPackaging())) {
-								return locateRepositoryProject(subPom);
+		if (mavenProject != null) {
+			if ("pom".equals(mavenProject.getPackaging())) {
+				for (Object o : mavenProject.getModules()) {
+					if (o instanceof String) {
+						String moduleAsString = (String) o;
+						File subPom = new File(mavenProjectFile.getParentFile().getPath() + File.separator
+								+ moduleAsString + File.separator + "pom.xml");
+						if (subPom.exists()) {
+							try {
+								FileReader fileReader = new FileReader(subPom);
+								MavenProject module = new MavenProject(new MavenXpp3Reader().read(fileReader));
+								if ("eclipse-repository".equals(module.getPackaging())) {
+									getLog().debug("Located repository from parent: " + module.getArtifactId());
+									return subPom.getParentFile();
+								} else if ("pom".equals(module.getPackaging())) {
+									return locateRepositoryProject(subPom);
+								}
+								fileReader.close();
+							} catch (IOException e) {
+								getLog().warn("Exception encountered while locating repository project", e);
+							} catch (XmlPullParserException e) {
+								getLog().warn("Exception encountered while locating repository project", e);
 							}
-							fileReader.close();
-						} catch (IOException e) {
-							getLog().warn("Exception encountered while locating repository project", e);
-						} catch (XmlPullParserException e) {
-							getLog().warn("Exception encountered while locating repository project", e);
 						}
 					}
 				}
+			} else if ("eclipse-repository".equals(mavenProject.getPackaging())) {
+				return mavenProjectFile.getParentFile();
 			}
 		}
 		getLog().debug(
