@@ -24,7 +24,7 @@ public class RepositoryDescriptor {
 	/**
 	 * Features of repository
 	 */
-	private List<FeatureDescriptor> featureDescriptors = new ArrayList<FeatureDescriptor>();
+	private List<CategoryDescriptor> categoryDescriptors = new ArrayList<CategoryDescriptor>();
 
 	/**
 	 * @param Repository
@@ -42,10 +42,10 @@ public class RepositoryDescriptor {
 	}
 
 	/**
-	 * @return features of repository
+	 * @return categories
 	 */
-	public List<FeatureDescriptor> getFeatureDescriptors() {
-		return featureDescriptors;
+	public List<CategoryDescriptor> getCategoryDescriptors() {
+		return categoryDescriptors;
 	}
 
 	/**

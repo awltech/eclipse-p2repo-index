@@ -26,10 +26,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.jdom.Document;
-import org.jdom.Element;
 import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
 
 /**
  * Maven Mojo that generates index.html file on Eclipse Repository, to prevent
@@ -51,7 +48,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	/**
 	 * User variable, used to force repository path
 	 */
-	@Parameter(required = false, property = "repositoryPath")
+	@Parameter(required = false, property = "repositoryPath", defaultValue = ".")
 	private String repositoryPath;
 
 	/**
@@ -59,8 +56,6 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	 */
 	@Parameter(required = false, property = "documentationUrl")
 	private String documentationURL;
-
-	private static final String VERSION = "0.1.3-SNAPSHOT";
 
 	/*
 	 * (non-Javadoc)
@@ -104,7 +99,10 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		}
 
 		RepositoryDescriptor repositoryDescriptor = getRepositoryDescriptor(repoPath);
-		Collections.sort(repositoryDescriptor.getFeatureDescriptors());
+		Collections.sort(repositoryDescriptor.getCategoryDescriptors());
+		for (CategoryDescriptor categoryDescriptor : repositoryDescriptor.getCategoryDescriptors()) {
+			Collections.sort(categoryDescriptor.getFeatureDescriptors());
+		}
 
 		// Initializes Velocity
 		VelocityEngine ve = new VelocityEngine();
@@ -121,7 +119,6 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			context.put("projectURL", projectURL);
 			context.put("dateNow", new Date());
 			context.put("dateSite", sdf.format(new Date(Long.parseLong(repositoryDescriptor.getTimestamp()))));
-			context.put("version", VERSION);
 			Template template = ve.getTemplate("index.html.vm");
 			FileWriter fileWriter = new FileWriter(index);
 			template.merge(context, fileWriter);
@@ -138,7 +135,6 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			f.createNewFile();
 			VelocityContext context = new VelocityContext();
 			context.put("dateNow", new Date());
-			context.put("version", VERSION);
 			Template template = ve.getTemplate("style.css.vm");
 			FileWriter fileWriter = new FileWriter(f);
 			template.merge(context, fileWriter);
@@ -240,72 +236,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				}
 			}
 			if (contentsFileInputStream != null) {
-				Document build = new SAXBuilder().build(contentsFileInputStream);
-				Element repository = build.getRootElement();
-
-				repositoryDescriptor.setName(repository.getAttributeValue("name"));
-
-				for (Object o : repository.getChild("properties").getChildren("property")) {
-					Element e = (Element) o;
-					if ("p2.timestamp".equals(e.getAttributeValue("name"))) {
-						repositoryDescriptor.setTimestamp(e.getAttributeValue("value"));
-					}
-				}
-
-				Element units = repository.getChild("units");
-				for (Object o : units.getChildren("unit")) {
-					Element unit = (Element) o;
-					Element unitProperties = unit.getChild("properties");
-					Element unitProvides = unit.getChild("provides");
-
-					String featureName = null;
-					String featureVersion = null;
-					String featureId = null;
-					String featureI18nId = null;
-					String providerName = null;
-					String providerI18NName = null;
-					boolean isFeature = false;
-					if (unitProperties != null) {
-						for (Object o1 : unitProperties.getChildren("property")) {
-							Element property = (Element) o1;
-							if ("org.eclipse.equinox.p2.name".equals(property.getAttributeValue("name"))) {
-								featureName = property.getAttributeValue("value");
-							}
-							if ("org.eclipse.equinox.p2.provider".equals(property.getAttributeValue("name"))) {
-								providerName = property.getAttributeValue("value");
-							}
-							if ("df_LT.featureName".equals(property.getAttributeValue("name"))) {
-								featureI18nId = property.getAttributeValue("value");
-							}
-							if ("df_LT.providerName".equals(property.getAttributeValue("name"))) {
-								providerI18NName = property.getAttributeValue("value");
-							}
-						}
-					}
-					if (unitProvides != null) {
-						for (Object o2 : unitProvides.getChildren("provided")) {
-							Element provided = (Element) o2;
-							if ("org.eclipse.equinox.p2.eclipse.type".equals(provided.getAttributeValue("namespace"))
-									&& "feature".equals(provided.getAttributeValue("name"))) {
-								isFeature = true;
-							}
-							if ("org.eclipse.update.feature".equals(provided.getAttributeValue("namespace"))) {
-								featureId = provided.getAttributeValue("name");
-								featureVersion = provided.getAttributeValue("version");
-							}
-						}
-					}
-					if (isFeature) {
-						String effectiveName = featureI18nId != null ? featureI18nId : featureName;
-						String effectiveProvider = providerI18NName != null ? providerI18NName : providerName;
-						FeatureDescriptor featureDescriptor = new FeatureDescriptor(featureId, effectiveName,
-								featureVersion, effectiveProvider);
-						getLog().info("Added feature: " + featureDescriptor);
-						repositoryDescriptor.getFeatureDescriptors().add(featureDescriptor);
-					}
-				}
-
-				return repositoryDescriptor;
+				return UpdateSiteDescriptorReader.read(contentsFileInputStream);
 			}
 		} catch (IOException e) {
 			getLog().warn("Encountered exception while reading repository information", e);
