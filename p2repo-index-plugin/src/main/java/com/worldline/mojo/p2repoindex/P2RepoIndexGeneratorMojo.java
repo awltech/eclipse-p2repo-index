@@ -48,7 +48,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	/**
 	 * User variable, used to force repository path
 	 */
-	@Parameter(required = false, property = "repositoryPath", defaultValue = ".")
+	@Parameter(required = false, property = "repositoryPath")
 	private String repositoryPath;
 
 	/**
