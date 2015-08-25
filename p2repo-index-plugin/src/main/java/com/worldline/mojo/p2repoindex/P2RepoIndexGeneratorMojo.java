@@ -66,35 +66,38 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("EEEE d MMMM yyyy 'at' h:mm a z");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-		getLog().debug(String.format("Input parameter [mavenProject=%s]", mavenProject));
-		getLog().debug(String.format("Input parameter [repositoryPath=%s]", repositoryPath));
-		getLog().debug(String.format("Input parameter [documentationURL=%s]", documentationURL));
+		getLog().info(
+				"Starting p2 repository index generation with parameters: [Maven Project=" + this.mavenProject
+						+ "][Repository Path=" + this.repositoryPath + "][Documentation URL=" + this.documentationURL
+						+ "].");
 
 		// Locates the repository project.
 		String repoPath = repositoryPath;
 		if (repoPath == null && this.mavenProject != null) {
+			getLog().debug("Repository path is not specified. Will locate it from Maven Project.");
 			File effectiveMavenProject = null;
 			try {
 				effectiveMavenProject = locateRepositoryProject(this.mavenProject.getFile());
+				getLog().debug("Repository project identified at: " + effectiveMavenProject + ".");
 			} catch (Exception e1) {
-				getLog().warn("Encountered Error while locating maven project !", e1);
+				getLog().warn("Encountered Error while locating Maven Project !", e1);
 			}
 			if (effectiveMavenProject != null) {
-				getLog().debug("Repository Path is null but not Maven Project. Will resolve Repository Path from it");
 				String basedirPath = effectiveMavenProject.getPath();
 				repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
 						.concat("repository");
+				getLog().debug("Repository folder identified at: " + repoPath);
 			}
 		}
-		getLog().info("Processing Eclipse repository at path: " + repoPath);
+		getLog().info("Processing Eclipse Repository from Path: " + repoPath);
 
 		String projectURL = documentationURL;
 		if (projectURL == null && this.mavenProject != null) {
 			projectURL = this.mavenProject.getUrl();
 		}
 
-		if (repoPath == null || !new File(repoPath).exists()) {
-			getLog().error("Cannot resolve Repository Path. Aborts.");
+		if (repoPath == null || !new File(repoPath).exists() || !new File(repoPath).isDirectory()) {
+			getLog().error("Path is null or doesn't lead to existing directory... Aborting.");
 			return;
 		}
 
@@ -112,6 +115,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		// Generate index.html file using velocity template
 		try {
+			getLog().debug("Starting generation of Index file...");
 			File index = new File(repoPath.concat(File.separator).concat("index.html"));
 			index.createNewFile();
 			VelocityContext context = new VelocityContext();
@@ -131,6 +135,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		// Creates empty style.css file & generates its contents using velocity
 		try {
+			getLog().debug("Starting generation of Style file...");
 			File f = new File(repoPath.concat(File.separator).concat("style.css"));
 			f.createNewFile();
 			VelocityContext context = new VelocityContext();
@@ -190,7 +195,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 								FileReader fileReader = new FileReader(subPom);
 								MavenProject module = new MavenProject(new MavenXpp3Reader().read(fileReader));
 								if ("eclipse-repository".equals(module.getPackaging())) {
-									getLog().debug("Located repository from parent: " + module.getArtifactId());
+									getLog().debug("Located repository in Module: " + module.getArtifactId());
 									return subPom.getParentFile();
 								} else if ("pom".equals(module.getPackaging())) {
 									return locateRepositoryProject(subPom);
@@ -205,10 +210,11 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 					}
 				}
 			} else if ("eclipse-repository".equals(mavenProject.getPackaging())) {
+				getLog().debug("Current module is a repository. Using it.");
 				return mavenProjectFile.getParentFile();
 			}
 		}
-		getLog().debug(
+		getLog().warn(
 				"Couldn't locate any repository from parent: "
 						+ (mavenProject != null ? mavenProject.getArtifactId() : "<UNDEF>"));
 		return null;
@@ -225,21 +231,29 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		RepositoryDescriptor repositoryDescriptor = new RepositoryDescriptor();
 		InputStream contentsFileInputStream = null;
 		ZipFile zipFile = null;
+		getLog().info("Locating content descriptor of Repository...");
 		try {
 			File xmlFile = new File(repoPath + "/content.xml");
 			if (xmlFile != null && xmlFile.exists()) {
 				contentsFileInputStream = new FileInputStream(xmlFile);
+				getLog().debug("Resolved contents repository descriptor at " + xmlFile.getName());
 			} else {
 				File jarFile = new File(repoPath + "/content.jar");
+				getLog().debug(
+						"Resolved contents repository descriptor at " + jarFile.getName() + ". Getting into it...");
 				if (jarFile != null && jarFile.exists()) {
 					zipFile = new ZipFile(jarFile);
 					ZipEntry entry = zipFile.getEntry("content.xml");
 					if (entry != null) {
+						getLog().debug("Resolved contents repository descriptor at " + entry.getName());
 						contentsFileInputStream = zipFile.getInputStream(entry);
+					} else {
+						getLog().warn("Could not find contents repository descriptor in archive.");
 					}
 				}
 			}
 			if (contentsFileInputStream != null) {
+				getLog().info("Processing contents of repository descriptor file...");
 				return UpdateSiteDescriptorReader.read(contentsFileInputStream, getLog());
 			}
 		} catch (IOException e) {

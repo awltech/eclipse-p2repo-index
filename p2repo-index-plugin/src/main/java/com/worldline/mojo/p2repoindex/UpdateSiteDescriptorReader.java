@@ -93,17 +93,17 @@ public class UpdateSiteDescriptorReader {
 			if (UpdateSiteDescriptorReader.isCategory(unit)) {
 				String id = unit.getAttributeValue("id");
 				categoryUnits.add(unit);
-				this.log.info("Found Category unit with id: " + id);
+				this.log.info("Created Category Unit with id: " + id);
 			} else if (UpdateSiteDescriptorReader.isGroup(unit)) {
 				String id = unit.getAttributeValue("id");
 				String version = unit.getAttributeValue("version");
 				groupMappings.put(new P2Identifier(id, version), toGroupMapping(unit));
-				this.log.info("Found Group unit with id: " + id + " and version: " + version);
+				this.log.debug("Found Group Unit with id: " + id + " and version: " + version);
 			} else if (UpdateSiteDescriptorReader.isFeature(unit)) {
 				String id = unit.getAttributeValue("id");
 				String version = unit.getAttributeValue("version");
 				featureUnits.put(new P2Identifier(id, version), toFeatureDescriptor(unit));
-				this.log.info("Found Feature unit with id: " + id + " and version: " + version);
+				this.log.debug("Found Feature Unit with id: " + id + " and version: " + version);
 			}
 		}
 
@@ -136,13 +136,13 @@ public class UpdateSiteDescriptorReader {
 								groupMappings, groupName) : groupMappings.get(new P2Identifier(groupName,
 								fromRange(groupRange)));
 						if (groupMapping != null) {
-							this.log.info("Found group Mapping " + groupName + " for category "
+							this.log.debug("Found group Mapping " + groupName + " for category "
 									+ categoryDescriptor.getName());
 							for (P2Identifier featureId : groupMapping.getInstalledFeatureIDs()) {
 								FeatureDescriptor featureDescriptor = featureUnits.get(featureId);
 								if (featureDescriptor != null) {
 									categoryDescriptor.getFeatureDescriptors().add(featureDescriptor);
-									this.log.info("Found feature " + featureId.getName() + " for group " + groupName);
+									this.log.info("Added feature " + featureId.getName() + " into group " + groupName);
 								}
 							}
 						}
@@ -178,7 +178,7 @@ public class UpdateSiteDescriptorReader {
 						&& required.getChildren("filter").size() > 0) {
 					String requiredName = required.getAttributeValue("name");
 					String requiredValue = required.getAttributeValue("range");
-					this.log.info("Added to group mapping " + identifier + " the feature with id " + requiredName);
+					this.log.debug("Added to group mapping " + identifier + " the feature with id " + requiredName);
 					groupMapping.getInstalledFeatureIDs().add(new P2Identifier(requiredName, fromRange(requiredValue)));
 				}
 			}
