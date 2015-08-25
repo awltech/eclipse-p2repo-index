@@ -231,7 +231,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		RepositoryDescriptor repositoryDescriptor = new RepositoryDescriptor();
 		InputStream contentsFileInputStream = null;
 		ZipFile zipFile = null;
-		getLog().info("Locating content descriptor of Repository...");
+		getLog().debug("Locating content descriptor of Repository...");
 		try {
 			File xmlFile = new File(repoPath + "/content.xml");
 			if (xmlFile != null && xmlFile.exists()) {

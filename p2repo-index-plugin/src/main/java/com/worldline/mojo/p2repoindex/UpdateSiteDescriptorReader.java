@@ -93,7 +93,7 @@ public class UpdateSiteDescriptorReader {
 			if (UpdateSiteDescriptorReader.isCategory(unit)) {
 				String id = unit.getAttributeValue("id");
 				categoryUnits.add(unit);
-				this.log.info("Created Category Unit with id: " + id);
+				this.log.debug("Created Category Unit with id: " + id);
 			} else if (UpdateSiteDescriptorReader.isGroup(unit)) {
 				String id = unit.getAttributeValue("id");
 				String version = unit.getAttributeValue("version");
@@ -123,6 +123,7 @@ public class UpdateSiteDescriptorReader {
 
 			CategoryDescriptor categoryDescriptor = new CategoryDescriptor(name);
 			repositoryDescriptor.getCategoryDescriptors().add(categoryDescriptor);
+			this.log.debug("Created Category Unit with name: [" + name + "].");
 
 			Element provides = categoryUnit.getChild("requires");
 			if (provides != null) {
@@ -131,7 +132,8 @@ public class UpdateSiteDescriptorReader {
 					if ("org.eclipse.equinox.p2.iu".equals(provided.getAttributeValue("namespace"))) {
 						String groupName = provided.getAttributeValue("name");
 						String groupRange = provided.getAttributeValue("range");
-						// Coming line is a patch, that seems to come when there is aggregation...
+						// Coming line is a patch, that seems to come when there
+						// is aggregation...
 						GroupMapping groupMapping = "1.0.0.qualifier".equals(groupRange) ? getGroupMappingByKeyOnly(
 								groupMappings, groupName) : groupMappings.get(new P2Identifier(groupName,
 								fromRange(groupRange)));
@@ -142,7 +144,8 @@ public class UpdateSiteDescriptorReader {
 								FeatureDescriptor featureDescriptor = featureUnits.get(featureId);
 								if (featureDescriptor != null) {
 									categoryDescriptor.getFeatureDescriptors().add(featureDescriptor);
-									this.log.info("Added feature " + featureId.getName() + " into group " + groupName);
+									this.log.info("Added feature [" + featureDescriptor.getName() + "] into Category ["
+											+ categoryDescriptor.getName() + "]");
 								}
 							}
 						}
