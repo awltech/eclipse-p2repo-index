@@ -66,10 +66,10 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("EEEE d MMMM yyyy 'at' h:mm a z");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-		getLog().info(
-				"Starting p2 repository index generation with parameters: [Maven Project=" + this.mavenProject
-						+ "][Repository Path=" + this.repositoryPath + "][Documentation URL=" + this.documentationURL
-						+ "].");
+		getLog().info("Starting p2 repository index generation with parameters:");
+		getLog().info("	[Maven Project=" + this.mavenProject + "]");
+		getLog().info("	[Repository Path=" + this.repositoryPath + "]");
+		getLog().info("	[Documentation URL=" + this.documentationURL + "]");
 
 		// Locates the repository project.
 		String repoPath = repositoryPath;
