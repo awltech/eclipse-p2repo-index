@@ -27,6 +27,7 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jdom.JDOMException;
+import com.worldline.mojo.p2repoindex.Messages;
 
 /**
  * Maven Mojo that generates index.html file on Eclipse Repository, to prevent
@@ -66,30 +67,30 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("EEEE d MMMM yyyy 'at' h:mm a z");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-		getLog().info("Starting p2 repository index generation with parameters:");
-		getLog().info("	[Maven Project=" + this.mavenProject + "]");
-		getLog().info("	[Repository Path=" + this.repositoryPath + "]");
-		getLog().info("	[Documentation URL=" + this.documentationURL + "]");
+		getLog().info(Messages.STARTING.value());
+		getLog().info(Messages.STARTING_PARAM_PROJECT.value(this.mavenProject));
+		getLog().info(Messages.STARTING_PARAM_REPO.value(this.repositoryPath));
+		getLog().info(Messages.STARTING_PARAM_DOC.value(this.documentationURL));
 
 		// Locates the repository project.
 		String repoPath = repositoryPath;
 		if (repoPath == null && this.mavenProject != null) {
-			getLog().debug("Repository path is not specified. Will locate it from Maven Project.");
+			getLog().debug(Messages.REPO_PATH_NOT_SPECIFIED.value());
 			File effectiveMavenProject = null;
 			try {
 				effectiveMavenProject = locateRepositoryProject(this.mavenProject.getFile());
-				getLog().debug("Repository project identified at: " + effectiveMavenProject + ".");
+				getLog().debug(Messages.REPO_PROJECT_FOUND.value(effectiveMavenProject));
 			} catch (Exception e1) {
-				getLog().warn("Encountered Error while locating Maven Project !", e1);
+				getLog().warn(Messages.ERROR_ENCOUNTERED.value(), e1);
 			}
 			if (effectiveMavenProject != null) {
 				String basedirPath = effectiveMavenProject.getPath();
 				repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
 						.concat("repository");
-				getLog().debug("Repository folder identified at: " + repoPath);
+				getLog().debug(Messages.REPO_FOLDER_FOUND.value(repoPath));
 			}
 		}
-		getLog().info("Processing Eclipse Repository from Path: " + repoPath);
+		getLog().info(Messages.PROCESSING_REPOSITORY.value(repoPath));
 
 		String projectURL = documentationURL;
 		if (projectURL == null && this.mavenProject != null) {
@@ -97,7 +98,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		}
 
 		if (repoPath == null || !new File(repoPath).exists() || !new File(repoPath).isDirectory()) {
-			getLog().error("Path is null or doesn't lead to existing directory... Aborting.");
+			getLog().error(Messages.ABORT_PATH_NULL.value());
 			return;
 		}
 
@@ -115,7 +116,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		// Generate index.html file using velocity template
 		try {
-			getLog().debug("Starting generation of Index file...");
+			getLog().debug(Messages.START_INDEX_GEN.value());
 			File index = new File(repoPath.concat(File.separator).concat("index.html"));
 			index.createNewFile();
 			VelocityContext context = new VelocityContext();
@@ -127,15 +128,15 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			FileWriter fileWriter = new FileWriter(index);
 			template.merge(context, fileWriter);
 			fileWriter.close();
-			getLog().info("Index file generated successfully at " + index.getPath() + ".");
+			getLog().info(Messages.DONE_INDEX_GEN.value(index.getPath()));
 		} catch (Exception e) {
-			getLog().error("Could not write index file because of " + e.getMessage() + ".", e);
+			getLog().error(Messages.ERROR_INDEX_GEN.value(e.getMessage()), e);
 			return;
 		}
 
 		// Creates empty style.css file & generates its contents using velocity
 		try {
-			getLog().debug("Starting generation of Style file...");
+			getLog().debug(Messages.START_STYLE_GEN.value());
 			File f = new File(repoPath.concat(File.separator).concat("style.css"));
 			f.createNewFile();
 			VelocityContext context = new VelocityContext();
@@ -144,9 +145,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			FileWriter fileWriter = new FileWriter(f);
 			template.merge(context, fileWriter);
 			fileWriter.close();
-			getLog().info("Style file generated successfully at " + f.getPath() + ".");
+			getLog().info(Messages.DONE_STYLE_GEN.value(f.getPath()));
 		} catch (IOException e) {
-			getLog().error("Could not write style file because of " + e.getMessage() + ".", e);
+			getLog().error(Messages.ERROR_STYLE_GEN.value(e.getMessage()), e);
 			return;
 		}
 
@@ -202,21 +203,20 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 								}
 								fileReader.close();
 							} catch (IOException e) {
-								getLog().warn("Exception encountered while locating repository project", e);
+								getLog().warn(Messages.EXCEPTION_LOCATING_REPO.value(), e);
 							} catch (XmlPullParserException e) {
-								getLog().warn("Exception encountered while locating repository project", e);
+								getLog().warn(Messages.EXCEPTION_LOCATING_REPO.value(), e);
 							}
 						}
 					}
 				}
 			} else if ("eclipse-repository".equals(mavenProject.getPackaging())) {
-				getLog().debug("Current module is a repository. Using it.");
+				getLog().debug(Messages.CURRENT_PROJ_IS_REPO.value());
 				return mavenProjectFile.getParentFile();
 			}
 		}
 		getLog().warn(
-				"Couldn't locate any repository from parent: "
-						+ (mavenProject != null ? mavenProject.getArtifactId() : "<UNDEF>"));
+				Messages.WARN_REPO_NOT_FOUND.value(mavenProject != null ? mavenProject.getArtifactId() : "<UNDEF>"));
 		return null;
 	}
 
@@ -231,48 +231,48 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 		RepositoryDescriptor repositoryDescriptor = new RepositoryDescriptor();
 		InputStream contentsFileInputStream = null;
 		ZipFile zipFile = null;
-		getLog().debug("Locating content descriptor of Repository...");
+		getLog().debug(Messages.LOCATING_DESCRIPTOR.value());
 		try {
 			File xmlFile = new File(repoPath + "/content.xml");
 			if (xmlFile != null && xmlFile.exists()) {
 				contentsFileInputStream = new FileInputStream(xmlFile);
-				getLog().debug("Resolved contents repository descriptor at " + xmlFile.getName());
+				getLog().debug(Messages.RESOLVED_DESCRIPTOR.value(xmlFile.getName()));
 			} else {
 				File jarFile = new File(repoPath + "/content.jar");
 				getLog().debug(
-						"Resolved contents repository descriptor at " + jarFile.getName() + ". Getting into it...");
+						Messages.RESOLVED_JAR_DESCRIPTOR.value(jarFile.getName()));
 				if (jarFile != null && jarFile.exists()) {
 					zipFile = new ZipFile(jarFile);
 					ZipEntry entry = zipFile.getEntry("content.xml");
 					if (entry != null) {
-						getLog().debug("Resolved contents repository descriptor at " + entry.getName());
+						getLog().debug(Messages.RESOLVED_JAR_FILE.value(entry.getName()));
 						contentsFileInputStream = zipFile.getInputStream(entry);
 					} else {
-						getLog().warn("Could not find contents repository descriptor in archive.");
+						getLog().warn(Messages.DESCRIPTOR_NOT_RESOLVED.value());
 					}
 				}
 			}
 			if (contentsFileInputStream != null) {
-				getLog().info("Processing contents of repository descriptor file...");
+				getLog().info(Messages.PROCESSING_DESCRIPTOR_CONTENTS.value());
 				return UpdateSiteDescriptorReader.read(contentsFileInputStream, getLog());
 			}
 		} catch (IOException e) {
-			getLog().warn("Encountered exception while reading repository information", e);
+			getLog().warn(Messages.EXCEPTION_LOCATING_REPO.value(), e);
 		} catch (JDOMException e) {
-			getLog().warn("Encountered exception while reading repository information", e);
+			getLog().warn(Messages.EXCEPTION_LOCATING_REPO.value(), e);
 		} finally {
 			if (contentsFileInputStream != null) {
 				try {
 					contentsFileInputStream.close();
 				} catch (IOException e) {
-					getLog().warn("Encountered exception while reading repository information", e);
+					getLog().warn(Messages.EXCEPTION_LOCATING_REPO.value(), e);
 				}
 			}
 			if (zipFile != null) {
 				try {
 					zipFile.close();
 				} catch (IOException e) {
-					getLog().warn("Encountered exception while reading repository information", e);
+					getLog().warn(Messages.EXCEPTION_LOCATING_REPO.value(), e);
 				}
 			}
 		}

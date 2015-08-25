@@ -24,6 +24,66 @@ import org.jdom.input.SAXBuilder;
  */
 public class UpdateSiteDescriptorReader {
 
+	private static final String COMMA = ",";
+
+	private static final String CLOSING_BRACKET = "]";
+
+	private static final String OPENING_BRACKET = "[";
+
+	private static final String CATEGORY_TYPE = "org.eclipse.equinox.p2.type.category";
+
+	private static final String TRUE = "true";
+
+	private static final String GROUP_TYPE = "org.eclipse.equinox.p2.type.group";
+
+	private static final String FEATURE_TYPE = "org.eclipse.update.feature";
+
+	private static final String I18N_PROVIDER_NAME_VARIABLE = "df_LT.providerName";
+
+	private static final String I18N_FEATURE_NAME_VARIABLE = "df_LT.featureName";
+
+	private static final String P2_PROVIDER_VARIABLE = "org.eclipse.equinox.p2.provider";
+
+	private static final String FEATURE_KEYWORD = "feature";
+
+	private static final String P2_ECLIPSE_TYPE_VARIABLE = "org.eclipse.equinox.p2.eclipse.type";
+
+	private static final String PROVIDED_VARIABLE = "provided";
+
+	private static final String PROVIDES_VARIABLE = "provides";
+
+	private static final String FILTER_VARIABLE = "filter";
+
+	private static final String RANGE_VARIABLE = "range";
+
+	private static final String P2_IU_VARIABLE = "org.eclipse.equinox.p2.iu";
+
+	private static final String NAMESPACE_VARIABLE = "namespace";
+
+	private static final String REQUIRED_VARIABLE = "required";
+
+	private static final String REQUIRES_VARIABLE = "requires";
+
+	private static final String P2_NAME_VARIABLE = "org.eclipse.equinox.p2.name";
+
+	private static final String VERSION_VARIABLE = "version";
+
+	private static final String ID_VARIABLE = "id";
+
+	private static final String UNIT_VARIABLE = "unit";
+
+	private static final String UNITS_VARIABLE = "units";
+
+	private static final String VALUE_VARIABLE = "value";
+
+	private static final String P2_TIMESTAMP = "p2.timestamp";
+
+	private static final String PROPERTY_VARIABLE = "property";
+
+	private static final String PROPERTIES_VARIABLE = "properties";
+
+	private static final String NAME_VARIABLE = "name";
+
 	/**
 	 * Input of the processus
 	 */
@@ -72,11 +132,11 @@ public class UpdateSiteDescriptorReader {
 		// Opens the file.
 		Document build = new SAXBuilder().build(this.updateSiteDescriptorStream);
 		Element repository = build.getRootElement();
-		this.repositoryDescriptor.setName(repository.getAttributeValue("name"));
-		for (Object o : repository.getChild("properties").getChildren("property")) {
+		this.repositoryDescriptor.setName(repository.getAttributeValue(NAME_VARIABLE));
+		for (Object o : repository.getChild(PROPERTIES_VARIABLE).getChildren(PROPERTY_VARIABLE)) {
 			Element e = (Element) o;
-			if ("p2.timestamp".equals(e.getAttributeValue("name"))) {
-				String attributeValue = e.getAttributeValue("value");
+			if (P2_TIMESTAMP.equals(e.getAttributeValue(NAME_VARIABLE))) {
+				String attributeValue = e.getAttributeValue(VALUE_VARIABLE);
 				repositoryDescriptor.setTimestamp(attributeValue != null && attributeValue.length() > 0 ? Long
 						.parseLong(attributeValue) : 0);
 			}
@@ -88,64 +148,64 @@ public class UpdateSiteDescriptorReader {
 		Map<P2Identifier, FeatureDescriptor> featureUnits = new HashMap<P2Identifier, FeatureDescriptor>();
 		Map<P2Identifier, GroupMapping> groupMappings = new HashMap<P2Identifier, GroupMapping>();
 
-		for (Iterator<?> iterator = repository.getChild("units").getChildren("unit").iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = repository.getChild(UNITS_VARIABLE).getChildren(UNIT_VARIABLE).iterator(); iterator
+				.hasNext();) {
 			Element unit = (Element) iterator.next();
 			if (UpdateSiteDescriptorReader.isCategory(unit)) {
-				String id = unit.getAttributeValue("id");
+				String id = unit.getAttributeValue(ID_VARIABLE);
 				categoryUnits.add(unit);
-				this.log.debug("Created Category Unit with id: " + id);
+				this.log.debug(Messages.CREATING_UNIT_CATEGORY.value(id));
 			} else if (UpdateSiteDescriptorReader.isGroup(unit)) {
-				String id = unit.getAttributeValue("id");
-				String version = unit.getAttributeValue("version");
+				String id = unit.getAttributeValue(ID_VARIABLE);
+				String version = unit.getAttributeValue(VERSION_VARIABLE);
 				groupMappings.put(new P2Identifier(id, version), toGroupMapping(unit));
-				this.log.debug("Found Group Unit with id: " + id + " and version: " + version);
+				this.log.debug(Messages.CREATING_UNIT_GROUP.value(id, version));
 			} else if (UpdateSiteDescriptorReader.isFeature(unit)) {
-				String id = unit.getAttributeValue("id");
-				String version = unit.getAttributeValue("version");
+				String id = unit.getAttributeValue(ID_VARIABLE);
+				String version = unit.getAttributeValue(VERSION_VARIABLE);
 				featureUnits.put(new P2Identifier(id, version), toFeatureDescriptor(unit));
-				this.log.debug("Found Feature Unit with id: " + id + " and version: " + version);
+				this.log.debug(Messages.CREATING_UNIT_FEATURE.value(id, version));
 			}
 		}
 
 		// Now process the categories and link them to the features and
 		// repository
 		for (Element categoryUnit : categoryUnits) {
-			Element properties = categoryUnit.getChild("properties");
+			Element properties = categoryUnit.getChild(PROPERTIES_VARIABLE);
 			String name = null;
 			if (properties != null) {
-				for (Iterator<?> iterator = properties.getChildren("property").iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = properties.getChildren(PROPERTY_VARIABLE).iterator(); iterator.hasNext();) {
 					Element property = (Element) iterator.next();
-					if (name == null && "org.eclipse.equinox.p2.name".equals(property.getAttributeValue("name"))) {
-						name = property.getAttributeValue("value");
+					if (name == null && P2_NAME_VARIABLE.equals(property.getAttributeValue(NAME_VARIABLE))) {
+						name = property.getAttributeValue(VALUE_VARIABLE);
 					}
 				}
 			}
 
 			CategoryDescriptor categoryDescriptor = new CategoryDescriptor(name);
 			repositoryDescriptor.getCategoryDescriptors().add(categoryDescriptor);
-			this.log.debug("Created Category Unit with name: [" + name + "].");
+			this.log.debug(Messages.CREATED_CATEGORY.value(name));
 
-			Element provides = categoryUnit.getChild("requires");
+			Element provides = categoryUnit.getChild(REQUIRES_VARIABLE);
 			if (provides != null) {
-				for (Iterator<?> iterator = provides.getChildren("required").iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = provides.getChildren(REQUIRED_VARIABLE).iterator(); iterator.hasNext();) {
 					Element provided = (Element) iterator.next();
-					if ("org.eclipse.equinox.p2.iu".equals(provided.getAttributeValue("namespace"))) {
-						String groupName = provided.getAttributeValue("name");
-						String groupRange = provided.getAttributeValue("range");
+					if (P2_IU_VARIABLE.equals(provided.getAttributeValue(NAMESPACE_VARIABLE))) {
+						String groupName = provided.getAttributeValue(NAME_VARIABLE);
+						String groupRange = provided.getAttributeValue(RANGE_VARIABLE);
 						// Coming line is a patch, that seems to come when there
 						// is aggregation...
 						GroupMapping groupMapping = "1.0.0.qualifier".equals(groupRange) ? getGroupMappingByKeyOnly(
 								groupMappings, groupName) : groupMappings.get(new P2Identifier(groupName,
 								fromRange(groupRange)));
 						if (groupMapping != null) {
-							this.log.debug("Found group Mapping " + groupName + " for category "
-									+ categoryDescriptor.getName());
+							this.log.debug(Messages.FOUND_GROUP_MAPPING.value(groupName, categoryDescriptor.getName()));
 							for (P2Identifier featureId : groupMapping.getInstalledFeatureIDs()) {
 								FeatureDescriptor featureDescriptor = featureUnits.get(featureId);
 								if (featureDescriptor != null) {
 									categoryDescriptor.getFeatureDescriptors().add(featureDescriptor);
-									this.log.info("Added feature [" + featureDescriptor.getName() + "] into Category ["
-											+ categoryDescriptor.getName() + "]");
+									this.log.info(Messages.ADDED_FEATURE.value(featureDescriptor.getName(),
+											categoryDescriptor.getName()));
 								}
 							}
 						}
@@ -171,17 +231,17 @@ public class UpdateSiteDescriptorReader {
 	 * @return
 	 */
 	private GroupMapping toGroupMapping(Element unit) {
-		String identifier = unit.getAttributeValue("id");
+		String identifier = unit.getAttributeValue(ID_VARIABLE);
 		GroupMapping groupMapping = new GroupMapping(identifier);
-		Element requires = unit.getChild("requires");
+		Element requires = unit.getChild(REQUIRES_VARIABLE);
 		if (requires != null) {
-			for (Iterator<?> iterator = requires.getChildren("required").iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = requires.getChildren(REQUIRED_VARIABLE).iterator(); iterator.hasNext();) {
 				Element required = (Element) iterator.next();
-				if ("org.eclipse.equinox.p2.iu".equals(required.getAttributeValue("namespace"))
-						&& required.getChildren("filter").size() > 0) {
-					String requiredName = required.getAttributeValue("name");
-					String requiredValue = required.getAttributeValue("range");
-					this.log.debug("Added to group mapping " + identifier + " the feature with id " + requiredName);
+				if (P2_IU_VARIABLE.equals(required.getAttributeValue(NAMESPACE_VARIABLE))
+						&& required.getChildren(FILTER_VARIABLE).size() > 0) {
+					String requiredName = required.getAttributeValue(NAME_VARIABLE);
+					String requiredValue = required.getAttributeValue(RANGE_VARIABLE);
+					this.log.debug(Messages.FEATURE_ADDED_TO_GROUP.value(identifier, requiredName));
 					groupMapping.getInstalledFeatureIDs().add(new P2Identifier(requiredName, fromRange(requiredValue)));
 				}
 			}
@@ -196,8 +256,8 @@ public class UpdateSiteDescriptorReader {
 	 * @return
 	 */
 	private String fromRange(String version) {
-		if (version.startsWith("[") && version.endsWith("]") && version.indexOf(",") > 0) {
-			String substring = version.substring(1, version.indexOf(","));
+		if (version.startsWith(OPENING_BRACKET) && version.endsWith(CLOSING_BRACKET) && version.indexOf(COMMA) > 0) {
+			String substring = version.substring(1, version.indexOf(COMMA));
 			return substring;
 		}
 		return version;
@@ -211,12 +271,12 @@ public class UpdateSiteDescriptorReader {
 	 * @return
 	 */
 	private static boolean isFeature(Element unit) {
-		Element provides = unit.getChild("provides");
+		Element provides = unit.getChild(PROVIDES_VARIABLE);
 		if (provides != null) {
-			for (Iterator<?> iterator = provides.getChildren("provided").iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = provides.getChildren(PROVIDED_VARIABLE).iterator(); iterator.hasNext();) {
 				Element provided = (Element) iterator.next();
-				if ("org.eclipse.equinox.p2.eclipse.type".equals(provided.getAttributeValue("namespace"))) {
-					return "feature".equals(provided.getAttributeValue("name"));
+				if (P2_ECLIPSE_TYPE_VARIABLE.equals(provided.getAttributeValue(NAMESPACE_VARIABLE))) {
+					return FEATURE_KEYWORD.equals(provided.getAttributeValue(NAME_VARIABLE));
 				}
 			}
 		}
@@ -235,32 +295,32 @@ public class UpdateSiteDescriptorReader {
 		String version = null;
 		String provider = null;
 
-		Element properties = unit.getChild("properties");
+		Element properties = unit.getChild(PROPERTIES_VARIABLE);
 		if (properties != null) {
-			for (Iterator<?> iterator = properties.getChildren("property").iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = properties.getChildren(PROPERTY_VARIABLE).iterator(); iterator.hasNext();) {
 				Element property = (Element) iterator.next();
-				if (name == null && "org.eclipse.equinox.p2.name".equals(property.getAttributeValue("name"))) {
-					name = property.getAttributeValue("value");
+				if (name == null && P2_NAME_VARIABLE.equals(property.getAttributeValue(NAME_VARIABLE))) {
+					name = property.getAttributeValue(VALUE_VARIABLE);
 				}
-				if (provider == null && "org.eclipse.equinox.p2.provider".equals(property.getAttributeValue("name"))) {
-					provider = property.getAttributeValue("value");
+				if (provider == null && P2_PROVIDER_VARIABLE.equals(property.getAttributeValue(NAME_VARIABLE))) {
+					provider = property.getAttributeValue(VALUE_VARIABLE);
 				}
-				if ("df_LT.featureName".equals(property.getAttributeValue("name"))) {
-					name = property.getAttributeValue("value");
+				if (I18N_FEATURE_NAME_VARIABLE.equals(property.getAttributeValue(NAME_VARIABLE))) {
+					name = property.getAttributeValue(VALUE_VARIABLE);
 				}
-				if ("df_LT.providerName".equals(property.getAttributeValue("name"))) {
-					provider = property.getAttributeValue("value");
+				if (I18N_PROVIDER_NAME_VARIABLE.equals(property.getAttributeValue(NAME_VARIABLE))) {
+					provider = property.getAttributeValue(VALUE_VARIABLE);
 				}
 			}
 		}
 
-		Element provides = unit.getChild("provides");
+		Element provides = unit.getChild(PROVIDES_VARIABLE);
 		if (provides != null) {
-			for (Iterator<?> iterator = provides.getChildren("provided").iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = provides.getChildren(PROVIDED_VARIABLE).iterator(); iterator.hasNext();) {
 				Element provided = (Element) iterator.next();
-				if ("org.eclipse.update.feature".equals(provided.getAttributeValue("namespace"))) {
-					id = provided.getAttributeValue("name");
-					version = provided.getAttributeValue("version");
+				if (FEATURE_TYPE.equals(provided.getAttributeValue(NAMESPACE_VARIABLE))) {
+					id = provided.getAttributeValue(NAME_VARIABLE);
+					version = provided.getAttributeValue(VERSION_VARIABLE);
 				}
 			}
 		}
@@ -275,12 +335,12 @@ public class UpdateSiteDescriptorReader {
 	 * @return
 	 */
 	private static boolean isGroup(Element unit) {
-		Element properties = unit.getChild("properties");
+		Element properties = unit.getChild(PROPERTIES_VARIABLE);
 		if (properties != null) {
-			for (Iterator<?> iterator = properties.getChildren("property").iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = properties.getChildren(PROPERTY_VARIABLE).iterator(); iterator.hasNext();) {
 				Element property = (Element) iterator.next();
-				if ("org.eclipse.equinox.p2.type.group".equals(property.getAttributeValue("name"))) {
-					return "true".equals(property.getAttributeValue("value"));
+				if (GROUP_TYPE.equals(property.getAttributeValue(NAME_VARIABLE))) {
+					return TRUE.equals(property.getAttributeValue(VALUE_VARIABLE));
 				}
 			}
 		}
@@ -295,12 +355,12 @@ public class UpdateSiteDescriptorReader {
 	 * @return
 	 */
 	private static boolean isCategory(Element unit) {
-		Element properties = unit.getChild("properties");
+		Element properties = unit.getChild(PROPERTIES_VARIABLE);
 		if (properties != null) {
-			for (Iterator<?> iterator = properties.getChildren("property").iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = properties.getChildren(PROPERTY_VARIABLE).iterator(); iterator.hasNext();) {
 				Element property = (Element) iterator.next();
-				if ("org.eclipse.equinox.p2.type.category".equals(property.getAttributeValue("name"))) {
-					return "true".equals(property.getAttributeValue("value"));
+				if (CATEGORY_TYPE.equals(property.getAttributeValue(NAME_VARIABLE))) {
+					return TRUE.equals(property.getAttributeValue(VALUE_VARIABLE));
 				}
 			}
 		}

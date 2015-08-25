@@ -74,15 +74,19 @@ public class P2Identifier {
 			return false;
 		P2Identifier other = (P2Identifier) obj;
 		if (name == null) {
-			if (other.name != null)
+			if (other.name != null) {
 				return false;
-		} else if (!name.equals(other.name))
+			}
+		} else if (!name.equals(other.name)) {
 			return false;
+		}
 		if (version == null) {
-			if (other.version != null)
+			if (other.version != null) {
 				return false;
-		} else if (!version.equals(other.version))
+			}
+		} else if (!version.equals(other.version)) {
 			return false;
+		}
 		return true;
 	}
 
