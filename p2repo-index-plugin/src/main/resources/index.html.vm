@@ -6,7 +6,7 @@
 <body>
 	<div>
 		<section>
-			<h2>You are now on the "$repositoryDescriptor.name" Update Site !</h2>
+			<span id="title">You are now on the "$repositoryDescriptor.name" Update Site !</span>
 		</section>
 		<section>
 			<p>
@@ -18,7 +18,7 @@
 #end
 			</p>
 		<p>
-			<h3>Below are the available features, proposed by this Update Site:</h3>
+			<span id="subtitle">Below are the available features, proposed by this Update Site:</span>
 		</p>
 		</section>
 		<hr />
@@ -26,22 +26,23 @@
 		<ul>
 #foreach ($category in $repositoryDescriptor.categoryDescriptors)
 			<li>
-				<h3>$category.name</h3>
+				<span id="category">$category.name</span>
 			
 				<p>
 					<ul>
 #foreach ($feature in $category.featureDescriptors)
-							<li>$feature.name ($feature.version)</li> <!-- <metadata><identifier>$feature.id</identifier><provider>$feature.provider</provider></metadata> -->
+							<li><span id="feature-name">$feature.name</span> <span id="feature-version">($feature.version)</span></li> <!-- <metadata><identifier>$feature.id</identifier><provider>$feature.provider</provider></metadata> -->
 #end
 					</ul>
 				</p>
-#end
 			</li>
+#end
+			</ul>
 			</section>
 			<hr />
 			<section>
 			<p>
-				<div><i>(<a href="https://github.com/awltech/eclipse-p2repo-index">This page has been generated</a> upon an Update Site built on $dateSite.)</i></div>
+				<span id="footer">(<a href="https://github.com/awltech/eclipse-p2repo-index">This page has been generated</a> upon an Update Site built on $dateSite.)</span>
 			</p>
 		</section>
 	</div>

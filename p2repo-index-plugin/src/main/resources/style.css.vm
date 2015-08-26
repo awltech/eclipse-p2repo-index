@@ -4,8 +4,16 @@ body {
 	text-align: left;
 	font-family: verdana, arial, sans-serif;
 	font-size: 0.8em;
-	color: #333;
-	background-color: #EEE;
+	color: #000;
+	background-color: #FFFFFF;
+}
+
+h1 {
+	color: #2C2255;
+}
+
+a {
+	color: #DA7A08;	
 }
 
 td {
@@ -14,4 +22,41 @@ td {
 
 th {
 	font-size: 0.8em;
+}
+
+ul,li {
+    margin: 5px;
+    list-style-type: none;
+}
+
+#title {
+	font-size: 1.8em;
+	font-weight: bold;
+	color: #2C2255;
+	font-family: verdana, arial, sans-serif;
+}
+
+#subtitle {
+	font-size: 1.2em;
+	font-weight: bold;
+	color: #2C2255;
+	font-family: verdana, arial, sans-serif;
+}
+
+#category {
+	font-size: 1.2em;
+	font-weight: bold;
+	color: #2C2255;
+	font-family: verdana, arial, sans-serif;
+}
+
+#feature-name {
+}
+
+#feature-version {
+	color: #DA7A08;	
+}
+
+#footer {
+	font-style: italic;
 }
