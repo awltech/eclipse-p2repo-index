@@ -195,9 +195,11 @@ public class UpdateSiteDescriptorReader {
 						String groupRange = provided.getAttributeValue(RANGE_VARIABLE);
 						// Coming line is a patch, that seems to come when there
 						// is aggregation...
-						GroupMapping groupMapping = "1.0.0.qualifier".equals(groupRange) ? getGroupMappingByKeyOnly(
-								groupMappings, groupName) : groupMappings.get(new P2Identifier(groupName,
-								fromRange(groupRange)));
+						GroupMapping groupMapping = groupMappings
+								.get(new P2Identifier(groupName, fromRange(groupRange)));
+						if (groupMapping == null) {
+							groupMapping = getGroupMappingByKeyOnly(groupMappings, groupName);
+						}
 						if (groupMapping != null) {
 							this.log.debug(Messages.FOUND_GROUP_MAPPING.value(groupName, categoryDescriptor.getName()));
 							for (P2Identifier featureId : groupMapping.getInstalledFeatureIDs()) {
