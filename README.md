@@ -13,7 +13,7 @@ To use it, once packaged, add the following plugin information in the tycho repo
 		<plugin>
 			<groupId>com.worldline.mojo</groupId>
 			<artifactId>p2repo-index-plugin</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.2.0-SNAPSHOT</version>
 			<executions>
 				<execution>
 					<id>generate-index</id>
@@ -27,3 +27,11 @@ To use it, once packaged, add the following plugin information in the tycho repo
 	</plugins>
 </build>
 ```
+
+On top of that, it can be addressed in command line mode, for instance, for explicit execution in Jenkins Jobs:
+```
+mvn com.worldline.mojo:p2repo-index-plugin:LATEST:generate-index -DrepositoryPath=<...> -DdocumentationUrl=<...>
+```
+where
+- repositoryPath is to explicitely specify where Update Site to complete is, in case the current execution folder is not in the eclipse-repository maven module or in the parent project
+- documentationUrl is to enable link in generated index to propose redirection to effective documentation. If not specified, it will retrieve it as the URL parameter of the currently processed pom.
