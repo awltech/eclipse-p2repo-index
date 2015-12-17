@@ -58,11 +58,6 @@ public class P2RepoIndexGenerator {
 		logger.info(Messages.STARTING_PARAM_REPO.value(this.repositoryPath));
 		logger.info(Messages.STARTING_PARAM_DOC.value(this.documentationURL));
 
-		if (repositoryPath == null || !new File(repositoryPath).exists() || !new File(repositoryPath).isDirectory()) {
-			logger.error(Messages.ABORT_PATH_NULL.value());
-			return;
-		}
-
 		RepositoryDescriptor repositoryDescriptor = locator.getDescriptor(repositoryPath);
 		Collections.sort(repositoryDescriptor.getCategoryDescriptors());
 		for (CategoryDescriptor categoryDescriptor : repositoryDescriptor.getCategoryDescriptors()) {
