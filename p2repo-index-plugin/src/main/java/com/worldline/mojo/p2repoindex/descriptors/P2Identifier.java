@@ -1,4 +1,4 @@
-package com.worldline.mojo.p2repoindex;
+package com.worldline.mojo.p2repoindex.descriptors;
 
 /**
  * Technical class used to identify a p2 element. It is with its name and

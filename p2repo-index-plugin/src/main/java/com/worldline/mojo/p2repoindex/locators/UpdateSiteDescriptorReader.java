@@ -1,4 +1,4 @@
-package com.worldline.mojo.p2repoindex;
+package com.worldline.mojo.p2repoindex.locators;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,11 +9,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.maven.plugin.logging.Log;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
+import org.slf4j.Logger;
+
+import com.worldline.mojo.p2repoindex.Messages;
+import com.worldline.mojo.p2repoindex.descriptors.CategoryDescriptor;
+import com.worldline.mojo.p2repoindex.descriptors.FeatureDescriptor;
+import com.worldline.mojo.p2repoindex.descriptors.GroupMapping;
+import com.worldline.mojo.p2repoindex.descriptors.P2Identifier;
+import com.worldline.mojo.p2repoindex.descriptors.RepositoryDescriptor;
 
 /**
  * Utility class that takes a content.xml stream as input, and returns a
@@ -97,10 +104,10 @@ public class UpdateSiteDescriptorReader {
 	/**
 	 * Logger instance
 	 */
-	private Log log;
+	private Logger log;
 
 	// Private constructor. static method should be used
-	private UpdateSiteDescriptorReader(InputStream updateSiteDescriptorStream, Log log) {
+	private UpdateSiteDescriptorReader(InputStream updateSiteDescriptorStream, Logger log) {
 		this.updateSiteDescriptorStream = updateSiteDescriptorStream;
 		this.log = log;
 	}
@@ -115,7 +122,7 @@ public class UpdateSiteDescriptorReader {
 	 * @throws IOException
 	 * @throws JDOMException
 	 */
-	public static RepositoryDescriptor read(InputStream updateSiteDescriptorStream, Log log) throws IOException,
+	public static RepositoryDescriptor read(InputStream updateSiteDescriptorStream, Logger log) throws IOException,
 			JDOMException {
 		UpdateSiteDescriptorReader reader = new UpdateSiteDescriptorReader(updateSiteDescriptorStream, log);
 		reader.doRead();

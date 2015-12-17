@@ -1,4 +1,4 @@
-package com.worldline.mojo.p2repoindex;
+package com.worldline.mojo.p2repoindex.descriptors;
 
 /**
  * Data pojo describing a feature, read from content.xml file.

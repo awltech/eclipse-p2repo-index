@@ -1,4 +1,4 @@
-package com.worldline.mojo.p2repoindex;
+package com.worldline.mojo.p2repoindex.descriptors;
 
 import java.util.ArrayList;
 import java.util.List;
