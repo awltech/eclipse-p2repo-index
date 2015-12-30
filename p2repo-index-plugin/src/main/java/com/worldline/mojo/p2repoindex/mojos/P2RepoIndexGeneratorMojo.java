@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -45,6 +46,12 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	@Parameter(required = false, property = "documentationUrl")
 	private String documentationURL;
 
+	/**
+	 * Build identifier
+	 */
+	@Parameter(required = false, property = "buildId")
+	private String buildId;
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -88,7 +95,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			return;
 		}
 
-		new P2RepoIndexGenerator(repoPath, repoPath.concat(File.separator), projectURL).execute();
+		String buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+		
+		new P2RepoIndexGenerator(repoPath, repoPath.concat(File.separator), projectURL, buildId).execute();
 
 	}
 

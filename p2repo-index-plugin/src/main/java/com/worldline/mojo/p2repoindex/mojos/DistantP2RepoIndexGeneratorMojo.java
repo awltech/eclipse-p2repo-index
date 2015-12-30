@@ -2,6 +2,7 @@ package com.worldline.mojo.p2repoindex.mojos;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -41,6 +42,12 @@ public class DistantP2RepoIndexGeneratorMojo extends AbstractMojo {
 	@Parameter(required = false, property = "output", defaultValue = ".")
 	private String pathToOutputFolder;
 
+	/**
+	 * Build identifier
+	 */
+	@Parameter(required = false, property = "buildId")
+	private String buildId;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -56,7 +63,9 @@ public class DistantP2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		// Locates the repository project.
 
-		P2RepoIndexGenerator p2RepoIndexGenerator = new P2RepoIndexGenerator(repositoryPath, pathToOutputFolder.concat(File.separator), documentationURL);
+		String buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+
+		P2RepoIndexGenerator p2RepoIndexGenerator = new P2RepoIndexGenerator(repositoryPath, pathToOutputFolder.concat(File.separator), documentationURL, buildId);
 		p2RepoIndexGenerator.setLocator(new WebRepositoryDescriptorLocator());
 		p2RepoIndexGenerator.execute();
 

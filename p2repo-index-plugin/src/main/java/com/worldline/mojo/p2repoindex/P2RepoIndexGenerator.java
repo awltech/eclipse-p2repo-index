@@ -28,22 +28,24 @@ public class P2RepoIndexGenerator {
 	private String pathToOutputFile;
 	private String documentationURL;
 	private RepositoryDescriptorLocator locator = new FSRepositoryDescriptorLocator();
-	
-	public P2RepoIndexGenerator(String pathToRepository, String pathToOutputFile, String documentationUrl) {
-		this(LoggerFactory.getLogger(P2RepoIndexGenerator.class), pathToRepository, pathToOutputFile, documentationUrl);
+	private String buildId;
+
+	public P2RepoIndexGenerator(String pathToRepository, String pathToOutputFile, String documentationUrl, String buildId) {
+		this(LoggerFactory.getLogger(P2RepoIndexGenerator.class), pathToRepository, pathToOutputFile, documentationUrl, buildId);
 	}
-	
-	public P2RepoIndexGenerator(Logger logger, String pathToRepository, String pathToOutputFile, String documentationUrl) {
+
+	public P2RepoIndexGenerator(Logger logger, String pathToRepository, String pathToOutputFile, String documentationUrl, String buildId) {
 		this.logger = logger;
 		this.repositoryPath = pathToRepository;
 		this.pathToOutputFile = pathToOutputFile;
 		this.documentationURL = documentationUrl;
+		this.buildId = buildId;
 	}
-	
+
 	public void setLocator(RepositoryDescriptorLocator locator) {
 		this.locator = locator;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -54,7 +56,7 @@ public class P2RepoIndexGenerator {
 		SimpleDateFormat sdf = new SimpleDateFormat("EEEE d MMMM yyyy 'at' h:mm a z");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 		logger.info(Messages.STARTING.value());
-		//logger.info(Messages.STARTING_PARAM_PROJECT.value(this.mavenProject));
+		// logger.info(Messages.STARTING_PARAM_PROJECT.value(this.mavenProject));
 		logger.info(Messages.STARTING_PARAM_REPO.value(this.repositoryPath));
 		logger.info(Messages.STARTING_PARAM_DOC.value(this.documentationURL));
 
@@ -80,6 +82,7 @@ public class P2RepoIndexGenerator {
 			context.put("projectURL", documentationURL);
 			context.put("dateNow", new Date());
 			context.put("dateSite", sdf.format(new Date(repositoryDescriptor.getTimestamp())));
+			context.put("buildId", this.buildId);
 			Template template = ve.getTemplate("index.html.vm");
 			FileWriter fileWriter = new FileWriter(index);
 			template.merge(context, fileWriter);
@@ -108,5 +111,5 @@ public class P2RepoIndexGenerator {
 		}
 
 	}
-	
+
 }
