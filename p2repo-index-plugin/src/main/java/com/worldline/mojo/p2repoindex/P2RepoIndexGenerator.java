@@ -82,7 +82,7 @@ public class P2RepoIndexGenerator {
 			context.put("projectURL", documentationURL);
 			context.put("dateNow", new Date());
 			context.put("dateSite", sdf.format(new Date(repositoryDescriptor.getTimestamp())));
-			context.put("buildId", this.buildId);
+			context.put("version", this.buildId);
 			Template template = ve.getTemplate("index.html.vm");
 			FileWriter fileWriter = new FileWriter(index);
 			template.merge(context, fileWriter);
@@ -100,6 +100,7 @@ public class P2RepoIndexGenerator {
 			f.createNewFile();
 			VelocityContext context = new VelocityContext();
 			context.put("dateNow", new Date());
+			context.put("version", this.buildId);
 			Template template = ve.getTemplate("style.css.vm");
 			FileWriter fileWriter = new FileWriter(f);
 			template.merge(context, fileWriter);

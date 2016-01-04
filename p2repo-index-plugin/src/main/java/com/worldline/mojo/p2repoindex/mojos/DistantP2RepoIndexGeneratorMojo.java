@@ -48,6 +48,12 @@ public class DistantP2RepoIndexGeneratorMojo extends AbstractMojo {
 	@Parameter(required = false, property = "buildId")
 	private String buildId;
 
+	/**
+	 * Build identifier
+	 */
+	@Parameter(required = false, property = "version")
+	private String version;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -63,7 +69,10 @@ public class DistantP2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		// Locates the repository project.
 
-		String buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+		String buildId = version;
+		if (buildId == null) {
+			buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+		}
 
 		P2RepoIndexGenerator p2RepoIndexGenerator = new P2RepoIndexGenerator(repositoryPath, pathToOutputFolder.concat(File.separator), documentationURL, buildId);
 		p2RepoIndexGenerator.setLocator(new WebRepositoryDescriptorLocator());
