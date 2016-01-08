@@ -73,9 +73,9 @@ public class DistantP2RepoIndexGeneratorMojo extends AbstractMojo {
 		if (buildId == null) {
 			buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
 		}
-
-		P2RepoIndexGenerator p2RepoIndexGenerator = new P2RepoIndexGenerator(new MavenLoggerWrapper(getLog()), repositoryPath, pathToOutputFolder.concat(File.separator), documentationURL, buildId);
-		p2RepoIndexGenerator.setLocator(new WebRepositoryDescriptorLocator());
+		MavenLoggerWrapper mavenLoggerWrapper = new MavenLoggerWrapper(getLog());
+		P2RepoIndexGenerator p2RepoIndexGenerator = new P2RepoIndexGenerator(mavenLoggerWrapper, repositoryPath, pathToOutputFolder.concat(File.separator), documentationURL, buildId);
+		p2RepoIndexGenerator.setLocator(new WebRepositoryDescriptorLocator(mavenLoggerWrapper));
 		p2RepoIndexGenerator.execute();
 
 	}

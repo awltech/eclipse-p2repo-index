@@ -18,6 +18,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import com.worldline.mojo.p2repoindex.Messages;
 import com.worldline.mojo.p2repoindex.P2RepoIndexGenerator;
+import com.worldline.mojo.p2repoindex.locators.FSRepositoryDescriptorLocator;
 
 /**
  * Maven Mojo that generates index.html file on Eclipse Repository, to prevent from 404 errors when trying to access site from browser.
@@ -107,9 +108,11 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat(
 					"yyyyMMddHHmmssSSS").format(new Date());
 		}
-
-		new P2RepoIndexGenerator(new MavenLoggerWrapper(getLog()), repoPath, repoPath.concat(File.separator),
-				projectURL, buildId).execute();
+		MavenLoggerWrapper mavenLoggerWrapper = new MavenLoggerWrapper(getLog());
+		P2RepoIndexGenerator p2RepoIndexGenerator = new P2RepoIndexGenerator(mavenLoggerWrapper, repoPath,
+				repoPath.concat(File.separator), projectURL, buildId);
+		p2RepoIndexGenerator.setLocator(new FSRepositoryDescriptorLocator(mavenLoggerWrapper));
+		p2RepoIndexGenerator.execute();
 
 	}
 
