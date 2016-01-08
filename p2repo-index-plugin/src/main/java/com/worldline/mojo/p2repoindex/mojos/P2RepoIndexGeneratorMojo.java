@@ -51,13 +51,13 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	 */
 	@Parameter(required = false, property = "buildId")
 	private String buildId;
-	
+
 	/**
 	 * Build identifier
 	 */
 	@Parameter(required = false, property = "version")
 	private String version;
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -85,7 +85,8 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			}
 			if (effectiveMavenProject != null) {
 				String basedirPath = effectiveMavenProject.getPath();
-				repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator).concat("repository");
+				repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
+						.concat("repository");
 				getLog().debug(Messages.REPO_FOLDER_FOUND.value(repoPath));
 			}
 		}
@@ -103,10 +104,12 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		String buildId = version;
 		if (buildId == null) {
-			buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+			buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat(
+					"yyyyMMddHHmmssSSS").format(new Date());
 		}
-		
-		new P2RepoIndexGenerator(repoPath, repoPath.concat(File.separator), projectURL, buildId).execute();
+
+		new P2RepoIndexGenerator(new MavenLoggerWrapper(getLog()), repoPath, repoPath.concat(File.separator),
+				projectURL, buildId).execute();
 
 	}
 
@@ -145,7 +148,8 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				for (Object o : mavenProject.getModules()) {
 					if (o instanceof String) {
 						String moduleAsString = (String) o;
-						File subPom = new File(mavenProjectFile.getParentFile().getPath() + File.separator + moduleAsString + File.separator + "pom.xml");
+						File subPom = new File(mavenProjectFile.getParentFile().getPath() + File.separator
+								+ moduleAsString + File.separator + "pom.xml");
 						if (subPom.exists()) {
 							try {
 								FileReader fileReader = new FileReader(subPom);
@@ -170,7 +174,8 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				return mavenProjectFile.getParentFile();
 			}
 		}
-		getLog().warn(Messages.WARN_REPO_NOT_FOUND.value(mavenProject != null ? mavenProject.getArtifactId() : "<UNDEF>"));
+		getLog().warn(
+				Messages.WARN_REPO_NOT_FOUND.value(mavenProject != null ? mavenProject.getArtifactId() : "<UNDEF>"));
 		return null;
 	}
 }
