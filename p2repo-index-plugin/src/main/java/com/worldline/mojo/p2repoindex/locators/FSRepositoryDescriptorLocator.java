@@ -14,6 +14,12 @@ import org.slf4j.LoggerFactory;
 import com.worldline.mojo.p2repoindex.Messages;
 import com.worldline.mojo.p2repoindex.descriptors.RepositoryDescriptor;
 
+/**
+ * Implementation of the algorithm used to read repository metadata, when repository is located on FileSystem.
+ * 
+ * @author mvanbesien (mvaawl@gmail.com)
+ *
+ */
 public class FSRepositoryDescriptorLocator implements RepositoryDescriptorLocator {
 
 	private final Logger logger;

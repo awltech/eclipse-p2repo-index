@@ -21,27 +21,91 @@ import com.worldline.mojo.p2repoindex.descriptors.RepositoryDescriptor;
 import com.worldline.mojo.p2repoindex.locators.FSRepositoryDescriptorLocator;
 import com.worldline.mojo.p2repoindex.locators.RepositoryDescriptorLocator;
 
+/**
+ * Implementation that generates index.html and style.css files from a P2 repository.
+ * 
+ * @author mvanbesien (mvaawl@gmail.com)
+ *
+ */
 public class P2RepoIndexGenerator {
 
+	/**
+	 * Logger instance
+	 */
 	private final Logger logger;
-	private String repositoryPath;
-	private String pathToOutputFile;
-	private String documentationURL;
-	private RepositoryDescriptorLocator locator = new FSRepositoryDescriptorLocator();
-	private String buildId;
 
-	public P2RepoIndexGenerator(String pathToRepository, String pathToOutputFile, String documentationUrl, String buildId) {
-		this(LoggerFactory.getLogger(P2RepoIndexGenerator.class), pathToRepository, pathToOutputFile, documentationUrl, buildId);
+	/**
+	 * Path to the P2 repository, it is supported to generate files in.
+	 */
+	private String repositoryPath;
+
+	/**
+	 * Local FS path, describing the folder where the files will be generated. Here, the value is difference than repository path, to support local
+	 * generation to distant (http) repositories.
+	 */
+	private String pathToOutputFile;
+
+	/**
+	 * URL to the user's documentation. This is additional information that will be generated in index.html file.
+	 */
+	private String documentationURL;
+
+	/**
+	 * Algorithm to retrieve the P2 repository descriptors. Defaults to FileSystem repository descriptor
+	 */
+	private RepositoryDescriptorLocator locator = new FSRepositoryDescriptorLocator();
+
+	/**
+	 * This is additional information, used to version the generated files.
+	 */
+	private String version;
+
+	/**
+	 * Creates new P2 Repository Index Generator
+	 * 
+	 * @param pathToRepository
+	 *            path to where the repository is hosted
+	 * @param pathToOutputFile
+	 *            path to where the generated files will be put
+	 * @param documentationUrl
+	 *            user's documentation URL
+	 * @param version
+	 *            user's document version
+	 */
+	public P2RepoIndexGenerator(String pathToRepository, String pathToOutputFile, String documentationUrl,
+			String version) {
+		this(LoggerFactory.getLogger(P2RepoIndexGenerator.class), pathToRepository, pathToOutputFile, documentationUrl,
+				version);
 	}
 
-	public P2RepoIndexGenerator(Logger logger, String pathToRepository, String pathToOutputFile, String documentationUrl, String buildId) {
+	/**
+	 * Creates new P2 Repository Index Generator
+	 * 
+	 * @param logger
+	 *            logger instance, in case we want to have special one (case with Maven plugins)
+	 * @param pathToRepository
+	 *            path to where the repository is hosted
+	 * @param pathToOutputFile
+	 *            path to where the generated files will be put
+	 * @param documentationUrl
+	 *            user's documentation URL
+	 * @param version
+	 *            user's document version
+	 */
+	public P2RepoIndexGenerator(Logger logger, String pathToRepository, String pathToOutputFile,
+			String documentationUrl, String version) {
 		this.logger = logger;
 		this.repositoryPath = pathToRepository;
 		this.pathToOutputFile = pathToOutputFile;
 		this.documentationURL = documentationUrl;
-		this.buildId = buildId;
+		this.version = version;
 	}
 
+	/**
+	 * Sets the algorithm to retrieve the P2 repository descriptors
+	 * 
+	 * @param locator
+	 */
 	public void setLocator(RepositoryDescriptorLocator locator) {
 		this.locator = locator;
 	}
@@ -82,7 +146,7 @@ public class P2RepoIndexGenerator {
 			context.put("projectURL", documentationURL);
 			context.put("dateNow", new Date());
 			context.put("dateSite", sdf.format(new Date(repositoryDescriptor.getTimestamp())));
-			context.put("version", this.buildId);
+			context.put("version", this.version);
 			Template template = ve.getTemplate("index.html.vm");
 			FileWriter fileWriter = new FileWriter(index);
 			template.merge(context, fileWriter);
@@ -100,7 +164,7 @@ public class P2RepoIndexGenerator {
 			f.createNewFile();
 			VelocityContext context = new VelocityContext();
 			context.put("dateNow", new Date());
-			context.put("version", this.buildId);
+			context.put("version", this.version);
 			Template template = ve.getTemplate("style.css.vm");
 			FileWriter fileWriter = new FileWriter(f);
 			template.merge(context, fileWriter);
@@ -112,5 +176,4 @@ public class P2RepoIndexGenerator {
 		}
 
 	}
-
 }
