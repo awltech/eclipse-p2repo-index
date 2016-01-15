@@ -45,6 +45,7 @@ public class DistantP2RepoIndexGeneratorMojo extends AbstractMojo {
 	/**
 	 * Build identifier
 	 */
+	@Deprecated
 	@Parameter(required = false, property = "buildId")
 	private String buildId;
 
@@ -69,9 +70,9 @@ public class DistantP2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		// Locates the repository project.
 
-		String buildId = version;
+		String buildId = this.version;
 		if (buildId == null) {
-			buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+			buildId = this.buildId;
 		}
 		MavenLoggerWrapper mavenLoggerWrapper = new MavenLoggerWrapper(getLog());
 		P2RepoIndexGenerator p2RepoIndexGenerator = new P2RepoIndexGenerator(mavenLoggerWrapper, repositoryPath, pathToOutputFolder.concat(File.separator), documentationURL, buildId);
