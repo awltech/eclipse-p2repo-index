@@ -20,28 +20,28 @@
 #end
 			</p>
 			<p>
-			<span id="subtitle">Below are the available features, proposed by this Update Site:</span>
+				<span id="subtitle">Below are the available features, proposed by this Update Site:</span>
 			</p>
 		</section>
 		<hr />
 		<section>
-		<ul>
+			<ul>
 #foreach ($category in $repositoryDescriptor.categoryDescriptors)
-			<li>
-				<span id="category">$category.name</span>
-				<p>
-					<ul>
+				<li>
+					<span id="category">$category.name</span>
+					<p>
+						<ul>
 #foreach ($feature in $category.featureDescriptors)
 							<li><span id="feature-name">$feature.name</span> <span id="feature-version">($feature.version)</span></li> <!-- <metadata><identifier>$feature.id</identifier><provider>$feature.provider</provider></metadata> -->
 #end
-					</ul>
-				</p>
-			</li>
+						</ul>
+					</p>
+				</li>
 #end
 			</ul>
-			</section>
-			<hr />
-			<section>
+		</section>
+		<hr />
+		<section>
 			<p>
 				<span id="footer">(<a href="https://github.com/awltech/eclipse-p2repo-index">This page has been generated</a> upon an Update Site built on $dateSite.)</span>
 			</p>

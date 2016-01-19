@@ -2,7 +2,6 @@ package com.worldline.mojo.p2repoindex.mojos;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.maven.plugin.AbstractMojo;
