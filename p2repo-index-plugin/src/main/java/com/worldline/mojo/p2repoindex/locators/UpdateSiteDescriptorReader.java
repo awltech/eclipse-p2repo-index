@@ -23,8 +23,7 @@ import com.worldline.mojo.p2repoindex.descriptors.P2Identifier;
 import com.worldline.mojo.p2repoindex.descriptors.RepositoryDescriptor;
 
 /**
- * Utility class that takes a content.xml stream as input, and returns a
- * descriptors object graph, for this repository.
+ * Utility class that takes a content.xml stream as input, and returns a descriptors object graph, for this repository.
  * 
  * @author mvanbesien (mvaawl@gmail.com)
  *
@@ -94,7 +93,7 @@ public class UpdateSiteDescriptorReader {
 	/**
 	 * Input of the processus
 	 */
-	private final InputStream updateSiteDescriptorStream;
+	private final InputStream[] updateSiteDescriptorStreams;
 
 	/**
 	 * Output of the processus.
@@ -107,14 +106,13 @@ public class UpdateSiteDescriptorReader {
 	private Logger log;
 
 	// Private constructor. static method should be used
-	private UpdateSiteDescriptorReader(InputStream updateSiteDescriptorStream, Logger log) {
-		this.updateSiteDescriptorStream = updateSiteDescriptorStream;
+	private UpdateSiteDescriptorReader(InputStream[] updateSiteDescriptorStreams, Logger log) {
+		this.updateSiteDescriptorStreams = updateSiteDescriptorStreams;
 		this.log = log;
 	}
 
 	/**
-	 * Reads the stream, standing for a content.xml file, and returns the
-	 * repository descriptor associated with it.
+	 * Reads the stream, standing for a content.xml file, and returns the repository descriptor associated with it.
 	 * 
 	 * @param updateSiteDescriptorStream
 	 * @param log
@@ -122,9 +120,21 @@ public class UpdateSiteDescriptorReader {
 	 * @throws IOException
 	 * @throws JDOMException
 	 */
-	public static RepositoryDescriptor read(InputStream updateSiteDescriptorStream, Logger log) throws IOException,
-			JDOMException {
-		UpdateSiteDescriptorReader reader = new UpdateSiteDescriptorReader(updateSiteDescriptorStream, log);
+	public static RepositoryDescriptor read(InputStream updateSiteDescriptorStream, Logger log) throws IOException, JDOMException {
+		return read(new InputStream[] { updateSiteDescriptorStream }, log);
+	}
+
+	/**
+	 * Reads the stream, standing for a content.xml file, and returns the repository descriptor associated with it.
+	 * 
+	 * @param updateSiteDescriptorStream
+	 * @param log
+	 * @return
+	 * @throws IOException
+	 * @throws JDOMException
+	 */
+	public static RepositoryDescriptor read(InputStream[] updateSiteDescriptorStreams, Logger log) throws IOException, JDOMException {
+		UpdateSiteDescriptorReader reader = new UpdateSiteDescriptorReader(updateSiteDescriptorStreams, log);
 		reader.doRead();
 		return reader.repositoryDescriptor;
 	}
@@ -137,44 +147,50 @@ public class UpdateSiteDescriptorReader {
 	 */
 	private void doRead() throws IOException, JDOMException {
 		// Opens the file.
-		Document build = new SAXBuilder().build(this.updateSiteDescriptorStream);
-		Element repository = build.getRootElement();
-		this.repositoryDescriptor.setName(repository.getAttributeValue(NAME_VARIABLE));
-		for (Object o : repository.getChild(PROPERTIES_VARIABLE).getChildren(PROPERTY_VARIABLE)) {
-			Element e = (Element) o;
-			if (P2_TIMESTAMP.equals(e.getAttributeValue(NAME_VARIABLE))) {
-				String attributeValue = e.getAttributeValue(VALUE_VARIABLE);
-				repositoryDescriptor.setTimestamp(attributeValue != null && attributeValue.length() > 0 ? Long
-						.parseLong(attributeValue) : 0);
-			}
-		}
 
-		// Processes the units to sort them by type. Processes the ones that can
-		// be processed independently.
 		Set<Element> categoryUnits = new HashSet<Element>();
 		Map<P2Identifier, FeatureDescriptor> featureUnits = new HashMap<P2Identifier, FeatureDescriptor>();
 		Map<P2Identifier, GroupMapping> groupMappings = new HashMap<P2Identifier, GroupMapping>();
 
-		for (Iterator<?> iterator = repository.getChild(UNITS_VARIABLE).getChildren(UNIT_VARIABLE).iterator(); iterator
-				.hasNext();) {
-			Element unit = (Element) iterator.next();
-			if (UpdateSiteDescriptorReader.isCategory(unit)) {
-				String id = unit.getAttributeValue(ID_VARIABLE);
-				categoryUnits.add(unit);
-				this.log.debug(Messages.CREATING_UNIT_CATEGORY.value(id));
-			} else if (UpdateSiteDescriptorReader.isGroup(unit)) {
-				String id = unit.getAttributeValue(ID_VARIABLE);
-				String version = unit.getAttributeValue(VERSION_VARIABLE);
-				groupMappings.put(new P2Identifier(id, version), toGroupMapping(unit));
-				this.log.debug(Messages.CREATING_UNIT_GROUP.value(id, version));
-			} else if (UpdateSiteDescriptorReader.isFeature(unit)) {
-				String id = unit.getAttributeValue(ID_VARIABLE);
-				String version = unit.getAttributeValue(VERSION_VARIABLE);
-				featureUnits.put(new P2Identifier(id, version), toFeatureDescriptor(unit));
-				this.log.debug(Messages.CREATING_UNIT_FEATURE.value(id, version));
+		for (InputStream updateSiteDescriptorStream : this.updateSiteDescriptorStreams) {
+			Document build = new SAXBuilder().build(updateSiteDescriptorStream);
+			Element repository = build.getRootElement();
+			if (this.repositoryDescriptor.getName() == null) {
+				this.repositoryDescriptor.setName(repository.getAttributeValue(NAME_VARIABLE));
+			}
+
+			if (this.repositoryDescriptor.getTimestamp() == 0) {
+				for (Object o : repository.getChild(PROPERTIES_VARIABLE).getChildren(PROPERTY_VARIABLE)) {
+					Element e = (Element) o;
+					if (P2_TIMESTAMP.equals(e.getAttributeValue(NAME_VARIABLE))) {
+						String attributeValue = e.getAttributeValue(VALUE_VARIABLE);
+						repositoryDescriptor.setTimestamp(attributeValue != null && attributeValue.length() > 0 ? Long.parseLong(attributeValue) : 0);
+					}
+				}
+			}
+
+			// Processes the units to sort them by type. Processes the ones that can
+			// be processed independently.
+
+			for (Iterator<?> iterator = repository.getChild(UNITS_VARIABLE).getChildren(UNIT_VARIABLE).iterator(); iterator.hasNext();) {
+				Element unit = (Element) iterator.next();
+				if (UpdateSiteDescriptorReader.isCategory(unit)) {
+					String id = unit.getAttributeValue(ID_VARIABLE);
+					categoryUnits.add(unit);
+					this.log.debug(Messages.CREATING_UNIT_CATEGORY.value(id));
+				} else if (UpdateSiteDescriptorReader.isGroup(unit)) {
+					String id = unit.getAttributeValue(ID_VARIABLE);
+					String version = unit.getAttributeValue(VERSION_VARIABLE);
+					groupMappings.put(new P2Identifier(id, version), toGroupMapping(unit));
+					this.log.debug(Messages.CREATING_UNIT_GROUP.value(id, version));
+				} else if (UpdateSiteDescriptorReader.isFeature(unit)) {
+					String id = unit.getAttributeValue(ID_VARIABLE);
+					String version = unit.getAttributeValue(VERSION_VARIABLE);
+					featureUnits.put(new P2Identifier(id, version), toFeatureDescriptor(unit));
+					this.log.debug(Messages.CREATING_UNIT_FEATURE.value(id, version));
+				}
 			}
 		}
-
 		// Now process the categories and link them to the features and
 		// repository
 		for (Element categoryUnit : categoryUnits) {
@@ -202,8 +218,7 @@ public class UpdateSiteDescriptorReader {
 						String groupRange = provided.getAttributeValue(RANGE_VARIABLE);
 						// Coming line is a patch, that seems to come when there
 						// is aggregation...
-						GroupMapping groupMapping = groupMappings
-								.get(new P2Identifier(groupName, fromRange(groupRange)));
+						GroupMapping groupMapping = groupMappings.get(new P2Identifier(groupName, fromRange(groupRange)));
 						if (groupMapping == null) {
 							groupMapping = getGroupMappingByKeyOnly(groupMappings, groupName);
 						}
@@ -213,8 +228,7 @@ public class UpdateSiteDescriptorReader {
 								FeatureDescriptor featureDescriptor = featureUnits.get(featureId);
 								if (featureDescriptor != null) {
 									categoryDescriptor.getFeatureDescriptors().add(featureDescriptor);
-									this.log.info(Messages.ADDED_FEATURE.value(featureDescriptor.getName(),
-											categoryDescriptor.getName()));
+									this.log.info(Messages.ADDED_FEATURE.value(featureDescriptor.getName(), categoryDescriptor.getName()));
 								}
 							}
 						}
@@ -246,8 +260,7 @@ public class UpdateSiteDescriptorReader {
 		if (requires != null) {
 			for (Iterator<?> iterator = requires.getChildren(REQUIRED_VARIABLE).iterator(); iterator.hasNext();) {
 				Element required = (Element) iterator.next();
-				if (P2_IU_VARIABLE.equals(required.getAttributeValue(NAMESPACE_VARIABLE))
-						&& required.getChildren(FILTER_VARIABLE).size() > 0) {
+				if (P2_IU_VARIABLE.equals(required.getAttributeValue(NAMESPACE_VARIABLE)) && required.getChildren(FILTER_VARIABLE).size() > 0) {
 					String requiredName = required.getAttributeValue(NAME_VARIABLE);
 					String requiredValue = required.getAttributeValue(RANGE_VARIABLE);
 					this.log.debug(Messages.FEATURE_ADDED_TO_GROUP.value(identifier, requiredName));
@@ -273,8 +286,7 @@ public class UpdateSiteDescriptorReader {
 	}
 
 	/**
-	 * returns true is the unit passed as parameter is an XML element for a p2
-	 * feature
+	 * returns true is the unit passed as parameter is an XML element for a p2 feature
 	 * 
 	 * @param unit
 	 * @return
@@ -337,8 +349,7 @@ public class UpdateSiteDescriptorReader {
 	}
 
 	/**
-	 * returns true is the unit passed as parameter is an XML element for a p2
-	 * group
+	 * returns true is the unit passed as parameter is an XML element for a p2 group
 	 * 
 	 * @param unit
 	 * @return
@@ -357,8 +368,7 @@ public class UpdateSiteDescriptorReader {
 	}
 
 	/**
-	 * returns true is the unit passed as parameter is an XML element for a p2
-	 * category
+	 * returns true is the unit passed as parameter is an XML element for a p2 category
 	 * 
 	 * @param unit
 	 * @return
