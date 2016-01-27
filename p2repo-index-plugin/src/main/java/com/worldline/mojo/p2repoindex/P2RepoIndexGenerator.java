@@ -125,6 +125,12 @@ public class P2RepoIndexGenerator {
 		logger.info(Messages.STARTING_PARAM_DOC.value(this.documentationURL));
 
 		RepositoryDescriptor repositoryDescriptor = locator.getDescriptor(repositoryPath);
+		
+		if (repositoryDescriptor == null) {
+			logger.warn("No update site descriptor found at the specified file. Returns.");
+			return;
+		}
+		
 		Collections.sort(repositoryDescriptor.getCategoryDescriptors());
 		for (CategoryDescriptor categoryDescriptor : repositoryDescriptor.getCategoryDescriptors()) {
 			Collections.sort(categoryDescriptor.getFeatureDescriptors());

@@ -53,6 +53,7 @@ public class FSRepositoryDescriptorLocator implements RepositoryDescriptorLocato
 			logger.info("Found compositeContent.jar at specified path. Will use it as site descriptor");
 			return getCompositeContentJarDescriptor(aggrJarFile);
 		}
+		
 		return null;
 	}
 
