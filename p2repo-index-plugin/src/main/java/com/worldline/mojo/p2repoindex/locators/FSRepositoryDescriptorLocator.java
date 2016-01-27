@@ -33,54 +33,94 @@ public class FSRepositoryDescriptorLocator implements RepositoryDescriptorLocato
 	}
 
 	public RepositoryDescriptor getDescriptor(String repositoryPath) {
-		RepositoryDescriptor repositoryDescriptor = new RepositoryDescriptor();
-		InputStream contentsFileInputStream = null;
-		ZipFile zipFile = null;
-		logger.debug(Messages.LOCATING_DESCRIPTOR.value());
+		File xmlFile = new File(repositoryPath + "/content.xml");
+		if (xmlFile.exists()) {
+			logger.info("Found content.xml at specified path. Will use it as site descriptor");
+			return getContentXmlDescriptor(xmlFile);
+		}
+		File jarFile = new File(repositoryPath + "/content.jar");
+		if (jarFile.exists()) {
+			logger.info("Found content.jar at specified path. Will use it as site descriptor");
+			return getContentJarDescriptor(jarFile);
+		}
+		File aggrXmlFile = new File(repositoryPath + "/compositeContent.xml");
+		if (aggrXmlFile.exists()) {
+			logger.info("Found compositeContent.xml at specified path. Will use it as site descriptor");
+			return getCompositeContentXmlDescriptor(aggrXmlFile);
+		}
+		File aggrJarFile = new File(repositoryPath + "/compositeContent.jar");
+		if (aggrJarFile.exists()) {
+			logger.info("Found compositeContent.jar at specified path. Will use it as site descriptor");
+			return getCompositeContentJarDescriptor(aggrJarFile);
+		}
+		return null;
+	}
+
+	private RepositoryDescriptor getContentXmlDescriptor(File xmlFile) {
+		FileInputStream xmlFileInputStream = null;
 		try {
-			File xmlFile = new File(repositoryPath + "/content.xml");
-			if (xmlFile != null && xmlFile.exists()) {
-				contentsFileInputStream = new FileInputStream(xmlFile);
-				logger.debug(Messages.RESOLVED_DESCRIPTOR.value(xmlFile.getName()));
-			} else {
-				File jarFile = new File(repositoryPath + "/content.jar");
-				logger.debug(Messages.RESOLVED_JAR_DESCRIPTOR.value(jarFile.getName()));
-				if (jarFile != null && jarFile.exists()) {
-					zipFile = new ZipFile(jarFile);
-					ZipEntry entry = zipFile.getEntry("content.xml");
-					if (entry != null) {
-						logger.debug(Messages.RESOLVED_JAR_FILE.value(entry.getName()));
-						contentsFileInputStream = zipFile.getInputStream(entry);
-					} else {
-						logger.warn(Messages.DESCRIPTOR_NOT_RESOLVED.value());
-					}
+			xmlFileInputStream = new FileInputStream(xmlFile);
+			return UpdateSiteDescriptorReader.read(xmlFileInputStream, logger);
+		} catch (IOException e) {
+			logger.warn(e.getMessage(), e);
+		} catch (JDOMException e) {
+			logger.warn(e.getMessage(), e);
+		} finally {
+			if (xmlFileInputStream != null) {
+				try {
+					xmlFileInputStream.close();
+				} catch (IOException e) {
+					logger.warn(e.getMessage(), e);
 				}
 			}
-			if (contentsFileInputStream != null) {
-				logger.info(Messages.PROCESSING_DESCRIPTOR_CONTENTS.value());
+		}
+		return null;
+	}
+
+	private RepositoryDescriptor getContentJarDescriptor(File jarFile) {
+		InputStream contentsFileInputStream = null;
+		ZipFile zipFile = null;
+		try {
+			zipFile = new ZipFile(jarFile);
+			ZipEntry entry = zipFile.getEntry("content.xml");
+			if (entry != null) {
+				logger.debug(Messages.RESOLVED_JAR_FILE.value(entry.getName()));
+				contentsFileInputStream = zipFile.getInputStream(entry);
 				return UpdateSiteDescriptorReader.read(contentsFileInputStream, logger);
+			} else {
+				logger.warn(Messages.DESCRIPTOR_NOT_RESOLVED.value());
 			}
 		} catch (IOException e) {
-			logger.warn(Messages.EXCEPTION_LOCATING_REPO.value(), e);
+			logger.warn(e.getMessage(), e);
 		} catch (JDOMException e) {
-			logger.warn(Messages.EXCEPTION_LOCATING_REPO.value(), e);
+			logger.warn(e.getMessage(), e);
 		} finally {
 			if (contentsFileInputStream != null) {
 				try {
 					contentsFileInputStream.close();
 				} catch (IOException e) {
-					logger.warn(Messages.EXCEPTION_LOCATING_REPO.value(), e);
+					logger.warn(e.getMessage(), e);
 				}
 			}
 			if (zipFile != null) {
 				try {
 					zipFile.close();
 				} catch (IOException e) {
-					logger.warn(Messages.EXCEPTION_LOCATING_REPO.value(), e);
+					logger.warn(e.getMessage(), e);
 				}
 			}
 		}
-		return repositoryDescriptor;
+		return null;
+	}
+
+	private RepositoryDescriptor getCompositeContentXmlDescriptor(File aggrXmlFile) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private RepositoryDescriptor getCompositeContentJarDescriptor(File aggrJarFile) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
