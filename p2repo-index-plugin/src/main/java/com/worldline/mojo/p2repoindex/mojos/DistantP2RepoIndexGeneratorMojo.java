@@ -1,8 +1,6 @@
 package com.worldline.mojo.p2repoindex.mojos;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -10,7 +8,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import com.worldline.mojo.p2repoindex.Messages;
 import com.worldline.mojo.p2repoindex.P2RepoIndexGenerator;
 import com.worldline.mojo.p2repoindex.locators.WebRepositoryDescriptorLocator;
 
@@ -61,14 +58,7 @@ public class DistantP2RepoIndexGeneratorMojo extends AbstractMojo {
 	 */
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
-		SimpleDateFormat sdf = new SimpleDateFormat("EEEE d MMMM yyyy 'at' h:mm a z");
-		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-		getLog().info(Messages.STARTING.value());
-		getLog().info(Messages.STARTING_PARAM_REPO.value(this.repositoryPath));
-		getLog().info(Messages.STARTING_PARAM_DOC.value(this.documentationURL));
-
 		// Locates the repository project.
-
 		String buildId = this.version;
 		if (buildId == null) {
 			buildId = this.buildId;

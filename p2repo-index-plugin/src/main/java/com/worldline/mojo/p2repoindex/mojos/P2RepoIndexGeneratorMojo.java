@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.AbstractMojo;
@@ -65,13 +64,6 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	 * @see org.apache.maven.plugin.AbstractMojo#execute()
 	 */
 	public void execute() throws MojoExecutionException, MojoFailureException {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("EEEE d MMMM yyyy 'at' h:mm a z");
-		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-		getLog().info(Messages.STARTING.value());
-		getLog().info(Messages.STARTING_PARAM_PROJECT.value(this.mavenProject));
-		getLog().info(Messages.STARTING_PARAM_REPO.value(this.repositoryPath));
-		getLog().info(Messages.STARTING_PARAM_DOC.value(this.documentationURL));
 
 		// Locates the repository project.
 		String repoPath = repositoryPath;
