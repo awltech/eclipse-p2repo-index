@@ -35,3 +35,5 @@ mvn com.worldline.mojo:p2repo-index-plugin:LATEST:generate-index -DrepositoryPat
 where
 - repositoryPath is to explicitely specify where Update Site to complete is, in case the current execution folder is not in the eclipse-repository maven module or in the parent project
 - documentationUrl is to enable link in generated index to propose redirection to effective documentation. If not specified, it will retrieve it as the URL parameter of the currently processed pom.
+
+Build status: ![](https://travis-ci.org/awltech/eclipse-p2repo-index.svg?branch=master)
