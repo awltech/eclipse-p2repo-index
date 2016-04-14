@@ -96,7 +96,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		// Locates the repository project.
 		String repoPath = repositoryPath;
-		if (repoPath == null && this.mavenProject != null) {
+		if (repoPath == null && this.mavenProject != null && this.mavenProject.getFile() != null && this.mavenProject.getFile().exists()) {
 			getLog().debug(Messages.REPO_PATH_NOT_SPECIFIED.value());
 			File effectiveMavenProject = null;
 			try {
@@ -110,6 +110,9 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator).concat("repository");
 				getLog().debug(Messages.REPO_FOLDER_FOUND.value(repoPath));
 			}
+		} else {
+			getLog().info(Messages.REPO_IS_CURRENT_FOLDER.value());
+			repoPath = ".";
 		}
 		getLog().info(Messages.PROCESSING_REPOSITORY.value(repoPath));
 
