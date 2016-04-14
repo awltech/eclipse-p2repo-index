@@ -37,13 +37,16 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.worldline.mojo.p2repoindex.descriptors.CategoryDescriptor;
 import com.worldline.mojo.p2repoindex.descriptors.RepositoryDescriptor;
 import com.worldline.mojo.p2repoindex.locators.FSRepositoryDescriptorLocator;
 import com.worldline.mojo.p2repoindex.locators.RepositoryDescriptorLocator;
 
 /**
- * Implementation that generates index.html and style.css files from a P2 repository.
+ * Implementation that generates index.html and style.css files from a P2
+ * repository.
  * 
  * @author mvanbesien (mvaawl@gmail.com)
  *
@@ -61,18 +64,21 @@ public class P2RepoIndexGenerator {
 	private String repositoryPath;
 
 	/**
-	 * Local FS path, describing the folder where the files will be generated. Here, the value is difference than repository path, to support local
+	 * Local FS path, describing the folder where the files will be generated.
+	 * Here, the value is difference than repository path, to support local
 	 * generation to distant (http) repositories.
 	 */
 	private String pathToOutputFile;
 
 	/**
-	 * URL to the user's documentation. This is additional information that will be generated in index.html file.
+	 * URL to the user's documentation. This is additional information that will
+	 * be generated in index.html file.
 	 */
 	private String documentationURL;
 
 	/**
-	 * Algorithm to retrieve the P2 repository descriptors. Defaults to FileSystem repository descriptor
+	 * Algorithm to retrieve the P2 repository descriptors. Defaults to
+	 * FileSystem repository descriptor
 	 */
 	private RepositoryDescriptorLocator locator = new FSRepositoryDescriptorLocator();
 
@@ -82,6 +88,11 @@ public class P2RepoIndexGenerator {
 	private String version;
 
 	/**
+	 * True if JSon should be generated as well.
+	 */
+	private boolean generateJSon = false;
+
+	/**
 	 * Creates new P2 Repository Index Generator
 	 * 
 	 * @param pathToRepository
@@ -93,17 +104,16 @@ public class P2RepoIndexGenerator {
 	 * @param version
 	 *            user's document version
 	 */
-	public P2RepoIndexGenerator(String pathToRepository, String pathToOutputFile, String documentationUrl,
-			String version) {
-		this(LoggerFactory.getLogger(P2RepoIndexGenerator.class), pathToRepository, pathToOutputFile, documentationUrl,
-				version);
+	public P2RepoIndexGenerator(String pathToRepository, String pathToOutputFile, String documentationUrl, String version) {
+		this(LoggerFactory.getLogger(P2RepoIndexGenerator.class), pathToRepository, pathToOutputFile, documentationUrl, version);
 	}
 
 	/**
 	 * Creates new P2 Repository Index Generator
 	 * 
 	 * @param logger
-	 *            logger instance, in case we want to have special one (case with Maven plugins)
+	 *            logger instance, in case we want to have special one (case
+	 *            with Maven plugins)
 	 * @param pathToRepository
 	 *            path to where the repository is hosted
 	 * @param pathToOutputFile
@@ -113,8 +123,7 @@ public class P2RepoIndexGenerator {
 	 * @param version
 	 *            user's document version
 	 */
-	public P2RepoIndexGenerator(Logger logger, String pathToRepository, String pathToOutputFile,
-			String documentationUrl, String version) {
+	public P2RepoIndexGenerator(Logger logger, String pathToRepository, String pathToOutputFile, String documentationUrl, String version) {
 		this.logger = logger;
 		this.repositoryPath = pathToRepository;
 		this.pathToOutputFile = pathToOutputFile;
@@ -129,6 +138,16 @@ public class P2RepoIndexGenerator {
 	 */
 	public void setLocator(RepositoryDescriptorLocator locator) {
 		this.locator = locator;
+	}
+
+	/**
+	 * if set to true, generates an index.json file listing the features in a
+	 * readable way.
+	 * 
+	 * @param locator
+	 */
+	public void setGenerateJSon(boolean generateJSon) {
+		this.generateJSon = generateJSon;
 	}
 
 	/*
@@ -146,12 +165,12 @@ public class P2RepoIndexGenerator {
 		logger.info(Messages.STARTING_PARAM_DOC.value(this.documentationURL));
 
 		RepositoryDescriptor repositoryDescriptor = locator.getDescriptor(repositoryPath);
-		
+
 		if (repositoryDescriptor == null) {
 			logger.warn("No update site descriptor found at the specified file. Returns.");
 			return;
 		}
-		
+
 		Collections.sort(repositoryDescriptor.getCategoryDescriptors());
 		for (CategoryDescriptor categoryDescriptor : repositoryDescriptor.getCategoryDescriptors()) {
 			Collections.sort(categoryDescriptor.getFeatureDescriptors());
@@ -202,5 +221,23 @@ public class P2RepoIndexGenerator {
 			return;
 		}
 
+		if (this.generateJSon) {
+			try {
+				logger.debug(Messages.START_JSON_GEN.value());
+				File f = new File(this.pathToOutputFile.concat("index.json"));
+				f.createNewFile();
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				String json = gson.toJson(repositoryDescriptor);
+				FileWriter fileWriter = new FileWriter(f);
+				fileWriter.write(json);
+				fileWriter.close();
+				logger.info(Messages.DONE_JSON_GEN.value(f.getPath()));
+			} catch (IOException e) {
+				logger.error(Messages.ERROR_JSON_GEN.value(e.getMessage()), e);
+				return;
+			}
+		} else {
+			logger.debug(Messages.NO_JSON_GEN.value());
+		}
 	}
 }
