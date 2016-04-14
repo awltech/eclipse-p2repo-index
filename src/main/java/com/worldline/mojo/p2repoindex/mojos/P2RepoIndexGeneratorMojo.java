@@ -96,23 +96,25 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		// Locates the repository project.
 		String repoPath = repositoryPath;
-		if (repoPath == null && this.mavenProject != null && this.mavenProject.getFile() != null && this.mavenProject.getFile().exists()) {
-			getLog().debug(Messages.REPO_PATH_NOT_SPECIFIED.value());
-			File effectiveMavenProject = null;
-			try {
-				effectiveMavenProject = locateRepositoryProject(this.mavenProject.getFile());
-				getLog().debug(Messages.REPO_PROJECT_FOUND.value(effectiveMavenProject));
-			} catch (Exception e1) {
-				getLog().warn(Messages.ERROR_ENCOUNTERED.value(), e1);
+		if (repoPath == null) {
+			if (this.mavenProject != null && this.mavenProject.getFile() != null && this.mavenProject.getFile().exists()) {
+				getLog().debug(Messages.REPO_PATH_NOT_SPECIFIED.value());
+				File effectiveMavenProject = null;
+				try {
+					effectiveMavenProject = locateRepositoryProject(this.mavenProject.getFile());
+					getLog().debug(Messages.REPO_PROJECT_FOUND.value(effectiveMavenProject));
+				} catch (Exception e1) {
+					getLog().warn(Messages.ERROR_ENCOUNTERED.value(), e1);
+				}
+				if (effectiveMavenProject != null) {
+					String basedirPath = effectiveMavenProject.getPath();
+					repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator).concat("repository");
+					getLog().debug(Messages.REPO_FOLDER_FOUND.value(repoPath));
+				}
+			} else {
+				getLog().info(Messages.REPO_IS_CURRENT_FOLDER.value());
+				repoPath = ".";
 			}
-			if (effectiveMavenProject != null) {
-				String basedirPath = effectiveMavenProject.getPath();
-				repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator).concat("repository");
-				getLog().debug(Messages.REPO_FOLDER_FOUND.value(repoPath));
-			}
-		} else {
-			getLog().info(Messages.REPO_IS_CURRENT_FOLDER.value());
-			repoPath = ".";
 		}
 		getLog().info(Messages.PROCESSING_REPOSITORY.value(repoPath));
 
