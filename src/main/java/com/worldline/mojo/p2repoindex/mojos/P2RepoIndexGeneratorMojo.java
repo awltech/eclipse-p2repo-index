@@ -41,7 +41,8 @@ import com.worldline.mojo.p2repoindex.P2RepoIndexGenerator;
 import com.worldline.mojo.p2repoindex.locators.FSRepositoryDescriptorLocator;
 
 /**
- * Maven Mojo that generates index.html file on Eclipse Repository, to prevent from 404 errors when trying to access site from browser.
+ * Maven Mojo that generates index.html file on Eclipse Repository, to prevent
+ * from 404 errors when trying to access site from browser.
  * 
  * @author mvanbesien (mvaawl@gmail.com)
  *
@@ -50,7 +51,8 @@ import com.worldline.mojo.p2repoindex.locators.FSRepositoryDescriptorLocator;
 public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 	/**
-	 * Maven project gathered from Mojo execution. Used to locate repository when URL is not explicitly specified.
+	 * Maven project gathered from Mojo execution. Used to locate repository
+	 * when URL is not explicitly specified.
 	 */
 	@Parameter(required = false, defaultValue = "${project}")
 	private MavenProject mavenProject;
@@ -79,6 +81,12 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	@Parameter(required = false, property = "version")
 	private String version;
 
+	/**
+	 * 
+	 */
+	@Parameter(required = false, property = "generateJSon", defaultValue = "false")
+	private boolean generateJSon;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -99,8 +107,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 			}
 			if (effectiveMavenProject != null) {
 				String basedirPath = effectiveMavenProject.getPath();
-				repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator)
-						.concat("repository");
+				repoPath = basedirPath.concat(File.separator).concat("target").concat(File.separator).concat("repository");
 				getLog().debug(Messages.REPO_FOLDER_FOUND.value(repoPath));
 			}
 		}
@@ -118,13 +125,13 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 
 		String buildId = version;
 		if (buildId == null) {
-			buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat(
-					"yyyyMMddHHmmssSSS").format(new Date());
+			buildId = this.buildId != null && this.buildId.length() > 0 ? this.buildId : new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
 		}
 		MavenLoggerWrapper mavenLoggerWrapper = new MavenLoggerWrapper(getLog());
-		P2RepoIndexGenerator p2RepoIndexGenerator = new P2RepoIndexGenerator(mavenLoggerWrapper, repoPath,
-				repoPath.concat(File.separator), projectURL, buildId);
+		P2RepoIndexGenerator p2RepoIndexGenerator = new P2RepoIndexGenerator(mavenLoggerWrapper, repoPath, repoPath.concat(File.separator),
+				projectURL, buildId);
 		p2RepoIndexGenerator.setLocator(new FSRepositoryDescriptorLocator(mavenLoggerWrapper));
+		p2RepoIndexGenerator.setGenerateJSon(this.generateJSon);
 		p2RepoIndexGenerator.execute();
 
 	}
@@ -148,7 +155,8 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 	}
 
 	/**
-	 * Locates the repository project from its parent, identified by parent's pom file passed as parameter
+	 * Locates the repository project from its parent, identified by parent's
+	 * pom file passed as parameter
 	 * 
 	 * @param mavenProjectFile
 	 * @return
@@ -164,8 +172,8 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				for (Object o : mavenProject.getModules()) {
 					if (o instanceof String) {
 						String moduleAsString = (String) o;
-						File subPom = new File(mavenProjectFile.getParentFile().getPath() + File.separator
-								+ moduleAsString + File.separator + "pom.xml");
+						File subPom = new File(
+								mavenProjectFile.getParentFile().getPath() + File.separator + moduleAsString + File.separator + "pom.xml");
 						if (subPom.exists()) {
 							try {
 								FileReader fileReader = new FileReader(subPom);
@@ -190,8 +198,7 @@ public class P2RepoIndexGeneratorMojo extends AbstractMojo {
 				return mavenProjectFile.getParentFile();
 			}
 		}
-		getLog().warn(
-				Messages.WARN_REPO_NOT_FOUND.value(mavenProject != null ? mavenProject.getArtifactId() : "<UNDEF>"));
+		getLog().warn(Messages.WARN_REPO_NOT_FOUND.value(mavenProject != null ? mavenProject.getArtifactId() : "<UNDEF>"));
 		return null;
 	}
 }

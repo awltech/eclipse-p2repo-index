@@ -72,6 +72,12 @@ public class DistantP2RepoIndexGeneratorMojo extends AbstractMojo {
 	@Parameter(required = false, property = "version")
 	private String version;
 
+	/**
+	 * 
+	 */
+	@Parameter(required = false, property = "generateJSon", defaultValue = "false")
+	private boolean generateJSon;
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -87,6 +93,7 @@ public class DistantP2RepoIndexGeneratorMojo extends AbstractMojo {
 		MavenLoggerWrapper mavenLoggerWrapper = new MavenLoggerWrapper(getLog());
 		P2RepoIndexGenerator p2RepoIndexGenerator = new P2RepoIndexGenerator(mavenLoggerWrapper, repositoryPath, pathToOutputFolder.concat(File.separator), documentationURL, buildId);
 		p2RepoIndexGenerator.setLocator(new WebRepositoryDescriptorLocator(mavenLoggerWrapper));
+		p2RepoIndexGenerator.setGenerateJSon(this.generateJSon);
 		p2RepoIndexGenerator.execute();
 
 	}
