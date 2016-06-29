@@ -256,27 +256,25 @@ public class P2RepoIndexGenerator {
 	}
 
 	private final String getLocalVersion() {
-		InputStream stream = P2RepoIndexGenerator.class.getResourceAsStream("META-INF/maven/com.worldline.mojo/p2repo-index-plugin/pom.properties");
+		InputStream stream = P2RepoIndexGenerator.class.getResourceAsStream("/META-INF/maven/com.worldline.mojo/p2repo-index-plugin/pom.properties");
 		if (stream == null) {
-			stream = P2RepoIndexGenerator.class.getResourceAsStream("/META-INF/maven/com.worldline.mojo/p2repo-index-plugin/pom.properties");
-			if (stream == null) {
-				logger.info("Could not find pom.properties file. Version not in output");
-				return null;
-			}
+			logger.debug("Could not find pom.properties file. Version not in output");
+			return null;
 		}
 		Properties properties = new Properties();
 		try {
 			properties.load(stream);
 		} catch (IOException e) {
-			logger.info("Failed to load pom.properties file. Version not in output");
+			logger.debug("Failed to load pom.properties file. Version not in output");
 			return null;
 		}
 		try {
 			stream.close();
 		} catch (IOException e) {
 		}
-		String property = properties.getProperty("version");
-		logger.info("Version used in output will be " + property);
-		return property;
+		String version = properties.getProperty("version");
+
+		logger.debug("Version used in output will be " + version);
+		return version;
 	}
 }
