@@ -7,7 +7,7 @@
 	<title>$repositoryDescriptor.name Update Site</title>
 </head>
 <body>
-	<div>
+	<div id="contents">
 		<section>
 			<span id="title">You are now on the "$repositoryDescriptor.name" Update Site !</span>
 		</section>
