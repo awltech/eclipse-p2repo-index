@@ -24,9 +24,11 @@ package com.worldline.mojo.p2repoindex;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Properties;
 import java.util.TimeZone;
 
 import org.apache.velocity.Template;
@@ -193,6 +195,12 @@ public class P2RepoIndexGenerator {
 			context.put("dateNow", new Date());
 			context.put("dateSite", sdf.format(new Date(repositoryDescriptor.getTimestamp())));
 			context.put("version", this.version);
+			
+			String localVersion = getLocalVersion();
+			if (localVersion != null) {
+				context.put("localVersion", localVersion);
+			}
+			
 			Template template = ve.getTemplate("index.html.vm");
 			FileWriter fileWriter = new FileWriter(index);
 			template.merge(context, fileWriter);
@@ -211,6 +219,12 @@ public class P2RepoIndexGenerator {
 			VelocityContext context = new VelocityContext();
 			context.put("dateNow", new Date());
 			context.put("version", this.version);
+			
+			String localVersion = getLocalVersion();
+			if (localVersion != null) {
+				context.put("localVersion", localVersion);
+			}
+			
 			Template template = ve.getTemplate("style.css.vm");
 			FileWriter fileWriter = new FileWriter(f);
 			template.merge(context, fileWriter);
@@ -239,5 +253,23 @@ public class P2RepoIndexGenerator {
 		} else {
 			logger.debug(Messages.NO_JSON_GEN.value());
 		}
+	}
+
+	private static final String getLocalVersion() {
+		InputStream stream = P2RepoIndexGenerator.class.getResourceAsStream("META-INF/maven/com.worldline.mojo/p2repo-index-plugin/pom.properties");
+		if (stream == null) {
+			return null;
+		}
+		Properties properties = new Properties();
+		try {
+			properties.load(stream);
+		} catch (IOException e) {
+			return null;
+		}
+		try {
+			stream.close();
+		} catch (IOException e) {
+		}
+		return properties.getProperty("version");
 	}
 }
