@@ -195,12 +195,12 @@ public class P2RepoIndexGenerator {
 			context.put("dateNow", new Date());
 			context.put("dateSite", sdf.format(new Date(repositoryDescriptor.getTimestamp())));
 			context.put("version", this.version);
-			
+
 			String localVersion = getLocalVersion();
 			if (localVersion != null) {
 				context.put("localVersion", localVersion);
 			}
-			
+
 			Template template = ve.getTemplate("index.html.vm");
 			FileWriter fileWriter = new FileWriter(index);
 			template.merge(context, fileWriter);
@@ -219,12 +219,12 @@ public class P2RepoIndexGenerator {
 			VelocityContext context = new VelocityContext();
 			context.put("dateNow", new Date());
 			context.put("version", this.version);
-			
+
 			String localVersion = getLocalVersion();
 			if (localVersion != null) {
 				context.put("localVersion", localVersion);
 			}
-			
+
 			Template template = ve.getTemplate("style.css.vm");
 			FileWriter fileWriter = new FileWriter(f);
 			template.merge(context, fileWriter);
@@ -255,21 +255,28 @@ public class P2RepoIndexGenerator {
 		}
 	}
 
-	private static final String getLocalVersion() {
+	private final String getLocalVersion() {
 		InputStream stream = P2RepoIndexGenerator.class.getResourceAsStream("META-INF/maven/com.worldline.mojo/p2repo-index-plugin/pom.properties");
 		if (stream == null) {
-			return null;
+			stream = P2RepoIndexGenerator.class.getResourceAsStream("/META-INF/maven/com.worldline.mojo/p2repo-index-plugin/pom.properties");
+			if (stream == null) {
+				logger.info("Could not find pom.properties file. Version not in output");
+				return null;
+			}
 		}
 		Properties properties = new Properties();
 		try {
 			properties.load(stream);
 		} catch (IOException e) {
+			logger.info("Failed to load pom.properties file. Version not in output");
 			return null;
 		}
 		try {
 			stream.close();
 		} catch (IOException e) {
 		}
-		return properties.getProperty("version");
+		String property = properties.getProperty("version");
+		logger.info("Version used in output will be " + property);
+		return property;
 	}
 }
