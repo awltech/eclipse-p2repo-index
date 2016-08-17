@@ -4,7 +4,7 @@
 
 	<groupId>com.worldline.mojo</groupId>
 	<artifactId>p2repo-index-plugin</artifactId>
-	<version>0.5.1-SNAPSHOT</version>
+	<version>0.5.0</version>
 	<packaging>maven-plugin</packaging>
 
 	<contributors>
@@ -139,4 +139,11 @@
 		</pluginManagement>
 	</build>
 	<url>https://github.com/awltech/eclipse-p2repo-index</url>
+	<distributionManagement>
+		<repository>
+			<id>bintray-mvanbesien-awltech</id>
+			<name>mvanbesien-awltech</name>
+			<url>https://api.bintray.com/maven/mvanbesien/awltech/eclipse-p2repo-index/;publish=1</url>
+		</repository>
+	</distributionManagement>
 </project>
